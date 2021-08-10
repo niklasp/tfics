@@ -1,8 +1,6 @@
-# Webpack Frontend Starterkit
+# Threejs + Webpack Starterkit
 
-[![Dependabot badge](https://flat.badgen.net/dependabot/wbkd/webpack-starter?icon=dependabot)](https://dependabot.com/)
-
-A lightweight foundation for your next webpack based frontend project.
+A lightweight foundation for your next threejs + webpack based project.
 
 ### Installation
 
