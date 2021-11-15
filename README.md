@@ -1,6 +1,6 @@
 # Threejs + Webpack Starterkit
 
-A lightweight foundation for your next threejs + webpack based project.
+A lightweight foundation for your next threejs + webpack based project with up to date packages. Let's go 3D.
 
 ### Installation
 

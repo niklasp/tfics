@@ -13,38 +13,3 @@ body {
   top: 0;
   left: 0;
 }
-
-.fh {
-  position: relative;
-  min-height: 100vh;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 200px;
-  font-family: "Gill Sans Extrabold", sans-serif;
-
-  > * {
-    z-index: 2;
-  }
-
-  p {
-    mix-blend-mode: difference;
-    color: #fff;
-    text-transform: uppercase;
-    font-style: italic;
-  }
-}
-
-#about {
-  background: #000d;
-}
-
-#footer {
-  background: linear-gradient(#000a, #0ff4);
-  mix-blend-mode: difference;
-}
-
-#intro {
-  padding-bottom: 100vh;
-}
