@@ -1,14 +1,14 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
-import { monitorScroll } from './util';
+import { monitorScroll, loadModels } from './util';
 
 //import shaders
 import vertexShader from '../shaders/vertex.glsl';
 import fragmentShader from '../shaders/fragment.glsl';
 
 //import your models
-//import model from '../models/model.glb';
+import model from '../models/model.glb';
 export default class Sketch {
   constructor( options ) {
 
@@ -25,10 +25,10 @@ export default class Sketch {
 
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera( fov, this.width / this.height, near, far );
-    this.camera.position.z = 1;
+    this.camera.position.z = 25;
 
-    const gridHelper = new THREE.GridHelper( 100, 100 );
-    this.scene.add( gridHelper );
+    // const gridHelper = new THREE.GridHelper( 100, 100 );
+    // this.scene.add( gridHelper );
 
     this.renderer = new THREE.WebGLRenderer( {
       antialias: false,
@@ -37,6 +37,7 @@ export default class Sketch {
     } );
 
     this.renderer.setSize( this.width, this.height );
+    this.renderer.setClearColor(0xeeeeee, 1);
     this.container.appendChild( this.renderer.domElement );
 
     this.controls = new OrbitControls( this.camera, this.renderer.domElement );
@@ -64,21 +65,42 @@ export default class Sketch {
 
   addObjects() {
     this.geometry = new THREE.BoxGeometry( 0.4, 0.4, 0.4 );
-    this.material = new THREE.MeshNormalMaterial();
 
     this.material = new THREE.ShaderMaterial({
+      uniforms: {
+        u_time: { value: 0.0 },
+      },
+      side: THREE.DoubleSide,
       fragmentShader,
       vertexShader,
+      wireframe: true,
     });
 
-    this.mesh = new THREE.Mesh( this.geometry, this.material );
-    this.scene.add( this.mesh );
+    // this.mesh = new THREE.Mesh( this.geometry, this.material );
+    // this.scene.add( this.mesh );
+
+    loadModels(
+      model,
+      ( gltf ) => {
+        console.log( 'hello', gltf );
+        this.scene.add( gltf.scene );
+        gltf.scene.scale.set( 0.5, 0.5, 0.5 );
+
+        gltf.scene.traverse( o => {
+          if ( o.isMesh ) {
+            o.geometry.center();
+            o.material = this.material;
+          }
+        });
+      }
+    );
   }
 
   render() {
     this.time += 0.05;
-    this.mesh.rotation.x = this.time / 20;
-    this.mesh.rotation.y = this.time / 10;
+    this.material.uniforms.u_time.value = this.time;
+    // this.mesh.rotation.x = this.time / 20;
+    // this.mesh.rotation.y = this.time / 10;
 
     this.renderer.render( this.scene, this.camera );
     window.requestAnimationFrame( this.render.bind( this ) );

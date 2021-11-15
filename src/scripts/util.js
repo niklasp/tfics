@@ -22,10 +22,9 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
  * @param {*} onLoad 
  * @param {*} onError 
  */
-export const loadModels = ( onComplete, onLoad, onError ) => {
-  const that = this;
-  this.loader = new GLTFLoader();
-  this.loader.load(
+export const loadModels = ( model, onComplete = () => {}, onLoad = () => {}, onError = () => {}) => {
+  const loader = new GLTFLoader();
+  loader.load(
     // resource URL
     model,
     // called when the resource is loaded
