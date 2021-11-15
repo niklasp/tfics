@@ -73,7 +73,6 @@ export default class Sketch {
       side: THREE.DoubleSide,
       fragmentShader,
       vertexShader,
-      wireframe: true,
     });
 
     // this.mesh = new THREE.Mesh( this.geometry, this.material );
