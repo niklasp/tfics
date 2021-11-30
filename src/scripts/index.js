@@ -9,7 +9,7 @@ document.addEventListener(
   'DOMContentLoaded',
   () => {
     new Sketch({
-      dom: document.getElementById( 'threejs-container' )
+      dom: document.getElementById('threejs-container'),
     });
   },
   false

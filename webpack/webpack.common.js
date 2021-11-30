@@ -37,7 +37,7 @@ module.exports = {
         type: 'javascript/auto',
       },
       {
-        test: /\.(ico|jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|gltf|glb)(\?.*)?$/,
+        test: /\.(ico|jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|gltf|glb|hdr)(\?.*)?$/,
         use: {
           loader: 'file-loader',
           options: {
