@@ -265,14 +265,13 @@ export default class Sketch {
           }
         } );
 
-        that.city = gltf.scene.children[2];
+        that.city = gltf.scene.children[5];
         that.city.geometry.center();
 
         that.scene.add( that.city );
         loader.style.display = 'none';
       },
       function ( xhr ) {
-        
         loader.innerText = 'loading...';
       },
       // called when loading has errors
