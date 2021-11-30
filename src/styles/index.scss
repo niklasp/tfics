@@ -3,13 +3,54 @@ $body-color: slateblue;
 body {
   margin: 0;
   padding: 0;
-  height: 100%;
+  font-family: "Courier New", Courier, monospace;
 }
 
 #threejs-container {
   width: 100vw;
   height: 100vh;
-  position: fixed;
+}
+
+#blocker {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: #000a;
+  color: #fff;
+}
+
+#instructions {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+#info {
+  color: #f2f;
+  position: absolute;
   top: 0;
-  left: 0;
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+  text-align: center;
+  user-select: none;
+  pointer-events: none;
+  z-index: 1; /* TODO Solve this in HTML */
+}
+
+#loader {
+  z-index: 1;
+  position: absolute;
+  font-size: 100px;
+  top: 50%;
+  transform: translateY(-50%) translateX(-50%);
+  left: 50%;
+  width: 100px;
+  color: #f2f;
 }

@@ -1,0 +1,11 @@
+Model Information:
+* title:	New Metropolis
+* source:	https://sketchfab.com/3d-models/new-metropolis-db5f6bd0b17a446a870e51652c0527c6
+* author:	Pablofatale (https://sketchfab.com/Pablofatale)
+
+Model License:
+* license type:	CC-BY-ND-4.0 (http://creativecommons.org/licenses/by-nd/4.0/)
+* requirements:	Author must be credited. Modified versions can not be distributed. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "New Metropolis" (https://sketchfab.com/3d-models/new-metropolis-db5f6bd0b17a446a870e51652c0527c6) by Pablofatale (https://sketchfab.com/Pablofatale) licensed under CC-BY-ND-4.0 (http://creativecommons.org/licenses/by-nd/4.0/)
