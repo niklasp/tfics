@@ -2,9 +2,13 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { FlyControls } from 'three/examples/jsm/controls/FlyControls.js';
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
+import { LuminosityShader } from 'three/examples/jsm/shaders/LuminosityShader.js';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 import { FontLoader, Font } from 'three/examples/jsm/loaders/FontLoader.js';
 // import { RoughnessMipmapper } from 'three/examples/jsm/utils/RoughnessMipmapper.js';
@@ -12,10 +16,20 @@ import { FontLoader, Font } from 'three/examples/jsm/loaders/FontLoader.js';
 import * as dat from 'dat.gui';
 import VideoElement from './VideoElement';
 
+import vid1ph from '../models/raumschiff_erde.jpeg';
+
 import theFont from '../static/font3.json';
 import metropolisModel from '../models/untitled.glb';
+import krabbe from '../models/krabbe.glb';
+
+//import shaders
+import vertexShader from '../shaders/vertex.glsl';
+import fragmentShader from '../shaders/fragment.glsl';
+import shiftShader from '../shaders/shiftShader.glsl';
 
 import environment from '../static/bg.hdr';
+
+const DAMPENING_FACTOR = 0.01;
 
 export default class Sketch {
   constructor( options ) {
@@ -28,6 +42,11 @@ export default class Sketch {
 
     this.width = this.container.offsetWidth;
     this.height = this.container.offsetHeight;
+    this.dampenedMouseX = 0;
+    this.dampenedMouseY = 0;
+    this.dMouse = new THREE.Vector2( 0.0, 0.0 );
+    this.dampenedMouseVelocity = new THREE.Vector2( 0.0, 0.0 );
+    this.mouseTarget = new THREE.Vector2( 0.0, 0.0 );
 
     this.scene = new THREE.Scene();
     const color = 0xffffff;
@@ -64,7 +83,7 @@ export default class Sketch {
       alpha: true,
       autoClear: true,
       powerPreference: "high-performance",
-      preserveDrawingBuffer: true,
+      // preserveDrawingBuffer: true,
     } );
     // this.renderer.autoClearColor = false;
     this.renderer.setSize( this.width, this.height );
@@ -72,9 +91,43 @@ export default class Sketch {
     // this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     // this.renderer.toneMappingExposure = 1;
     // this.renderer.outputEncoding = THREE.sRGBEncoding;
-    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.enabled = false;
     this.renderer.outputEncoding = THREE.sRGBEncoding;
     this.container.appendChild( this.renderer.domElement );
+
+    this.composer = new EffectComposer( this.renderer );
+    const renderPass = new RenderPass( this.scene, this.camera );
+    this.composer.addPass( renderPass );
+    this.composer.setSize ( this.width, this.height );
+
+    this.materialUniforms = {
+      u_time: { value: 0.0 },
+      tDiffuse: { value: null },
+      pixelSize: { value: 10 },
+      resolution: { value: new THREE.Vector2( this.width, this.height ) },
+      u_mouse: { value: new THREE.Vector2( this.width / 2.0, this.height / 2.0 ) },
+      u_mouseDampened: { value: new THREE.Vector2( this.width / 2.0, this.height / 2.0 ) },
+      u_dMouse: { value: new THREE.Vector2( 0, 0 ) },
+      opacity: { value: 1.0 },
+      u_moveVector: { value: new THREE.Vector3( 0, 0, 0) },
+      u_viewport: { value: new THREE.Vector2( this.width, this.height ) },
+    };
+
+    this.material = new THREE.ShaderMaterial({
+      uniforms: this.materialUniforms,
+      side: THREE.DoubleSide,
+      fragmentShader,
+      vertexShader,
+    });
+
+    this.shader = {
+      uniforms: this.materialUniforms,
+      vertexShader,
+      fragmentShader: shiftShader,
+    };
+    this.shaderPass = new ShaderPass( this.shader );
+    this.composer.addPass( this.shaderPass );
+
 
     // this.controls = new OrbitControls( this.camera, this.renderer.domElement );
 
@@ -120,7 +173,17 @@ export default class Sketch {
     this.render();
   }
 
+  onMouseMove( e ) {
+    this.shaderPass.uniforms.u_mouse.value = new THREE.Vector2( e.clientX / this.width, (this.height - e.clientY) / this.height );
+    const dx = e.clientX - this.targetX;
+    const dy = e.clientY - this.lastMouseY;
+    this.dMouse = new THREE.Vector2( dx, dy );
+    this.targetX = e.clientX;
+    this.targetY = e.clientY;
+  }
+
   setupListeners() {
+    document.addEventListener( 'mousemove', this.onMouseMove.bind( this ) );
     window.addEventListener( 'resize', this.resize.bind( this ) );
   }
 
@@ -274,12 +337,18 @@ export default class Sketch {
       function ( xhr ) {
         loader.innerText = 'loading...';
       },
-      // called when loading has errors
       function ( error ) {
         console.log( 'An error happened', error );
       });
 
-    } );
+      // that.loader.load( krabbe,
+      //   function ( gltf ) {
+      //     console.log( 'krabbe', gltf );
+      //     that.scene.add( gltf.scene );
+      //   }
+      // );
+
+    });
   }
 
   addMovingText() {
@@ -326,6 +395,7 @@ export default class Sketch {
 
       el.object.lookAt( 0, 0, 0 );
       this.videoObjects.add( el.object );
+      this.videoObjects.rotation.z = 0.4;
     }
 
     this.scene.add( this.videoObjects );
@@ -335,12 +405,20 @@ export default class Sketch {
     window.requestAnimationFrame( this.render.bind( this ) );
     this.time+= 0.05;
 
-    this.controls.movementSpeed = 5.3;
+    this.controls.movementSpeed = 8.3;
     this.controls.update( this.clock.getDelta() );
 
     this.prevTime = this.time;
     // this.mesh.rotation.x = this.time / 10;
     // this.mesh.rotation.y = this.time / 30;
+
+    if ( Math.abs( this.dampenedMouseX - this.targetX ) > 0.0001 ) {
+      this.dampenedMouseX += ( this.targetX - this.dampenedMouseX ) * DAMPENING_FACTOR;
+    }
+
+    if ( Math.abs( this.dampenedMouseY - this.targetY ) > 0.0001 ) {
+      this.dampenedMouseY += ( this.targetY - this.dampenedMouseY ) * DAMPENING_FACTOR;
+    }
 
     if ( this.city ) {
       this.city.rotation.y = this.time / 50.0;
@@ -357,8 +435,12 @@ export default class Sketch {
       // mesh.position.set( camPos.x + Math.sin( this.time / 5.0 ) * 20 + idx * 40 - 440, camPos.y + 50 - idx * 8.0, camPos.z - 100 );
     });
     // this.mesh.position.set(  );
+    this.shaderPass.uniforms.u_time.value = this.time / 10.0;
+    this.shaderPass.uniforms.u_moveVector.value = this.controls.moveVector;
+    this.shaderPass.uniforms.u_mouseDampened.value = new THREE.Vector2( this.dampenedMouseX / this.width, (this.height - this.dampenedMouseY) / this.height );
+    this.shaderPass.uniforms.u_dMouse.value = this.dMouse;
 
-    this.renderer.render( this.scene, this.camera );
+    this.composer.render();
 
     // console.log( this.camera.rotation );
   }

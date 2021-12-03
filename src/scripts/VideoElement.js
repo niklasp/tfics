@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 
 export default class VideoElement {
-  constructor( videoId, x, y, z, ry, iframeId ) {
+  constructor( videoId, x, y, z, ry, placeholder, iframeId ) {
 
     const div = document.createElement( 'div' );
     div.style.width = '480px';
@@ -15,9 +15,12 @@ export default class VideoElement {
     iframe.style.border = '0px';
     iframe.src = [ 'https://www.youtube.com/embed/', videoId, '?rel=0'   ].join( '' );
     div.appendChild( iframe );
-
-    // const object = new CSS3DObject( div );
-    const object = new THREE.Mesh(new THREE.PlaneGeometry(16*2,9*2), new THREE.MeshStandardMaterial({ color: 0xff22ff}) );
+ 
+      // const object = new CSS3DObject( div );
+    const object = new THREE.Mesh(
+      new THREE.PlaneGeometry(16*2,9*2), 
+      new THREE.MeshStandardMaterial({ color: 0xff22ff, side: THREE.DoubleSide } )
+      );
     object.position.set( x, y, z);
     object.rotation.y = ry;
     return {
