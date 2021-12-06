@@ -42,11 +42,13 @@ export default class Sketch {
 
     this.width = this.container.offsetWidth;
     this.height = this.container.offsetHeight;
-    this.dampenedMouseX = 0;
-    this.dampenedMouseY = 0;
-    this.dMouse = new THREE.Vector2( 0.0, 0.0 );
-    this.dampenedMouseVelocity = new THREE.Vector2( 0.0, 0.0 );
-    this.mouseTarget = new THREE.Vector2( 0.0, 0.0 );
+
+    this.mouse = new THREE.Vector2( 0.0, 0.0 );
+    this.mouseSpeed = new THREE.Vector2( 0.0, 0.0 );
+    this.oldMouseSpeed = new THREE.Vector2( 0.0, 0.0 );
+    this.mouseAcc = new THREE.Vector2( 0.0, 0.0 );
+    this.lMouseSpeed = new THREE.Vector2( 0.0, 0.0 );
+    this.lMouse = new THREE.Vector2( 0.0, 0.0 );
 
     this.scene = new THREE.Scene();
     const color = 0xffffff;
@@ -111,14 +113,9 @@ export default class Sketch {
       opacity: { value: 1.0 },
       u_moveVector: { value: new THREE.Vector3( 0, 0, 0) },
       u_viewport: { value: new THREE.Vector2( this.width, this.height ) },
+      u_mouseSpeed: { value: new THREE.Vector2( this.width / 2.0, this.height / 2.0 ) },
     };
 
-    this.material = new THREE.ShaderMaterial({
-      uniforms: this.materialUniforms,
-      side: THREE.DoubleSide,
-      fragmentShader,
-      vertexShader,
-    });
 
     this.shader = {
       uniforms: this.materialUniforms,
@@ -174,12 +171,12 @@ export default class Sketch {
   }
 
   onMouseMove( e ) {
-    this.shaderPass.uniforms.u_mouse.value = new THREE.Vector2( e.clientX / this.width, (this.height - e.clientY) / this.height );
-    const dx = e.clientX - this.targetX;
-    const dy = e.clientY - this.lastMouseY;
-    this.dMouse = new THREE.Vector2( dx, dy );
-    this.targetX = e.clientX;
-    this.targetY = e.clientY;
+    this.oldMouse = this.mouse;
+    this.mouse = new THREE.Vector2( e.clientX / this.width , ( this.height - e.clientY ) / this.height );
+    this.oldMouseSpeed = this.mouseSpeed;
+    this.mouseSpeed = new THREE.Vector2( Math.abs(Math.min((this.mouse.x - this.oldMouse.x) * 10, 1)), Math.abs(Math.min((this.mouse.y - this.oldMouse.y) * 10), 1));
+    this.mouseAcc = new THREE.Vector2( (this.mouse.x - e.clientX) - this.mouseSpeed.x , (this.mouse.y - this.height + e.clientY) - this.mouseSpeed.y );
+    this.shaderPass.uniforms.u_mouse.value = this.mouse;
   }
 
   setupListeners() {
@@ -401,9 +398,20 @@ export default class Sketch {
     this.scene.add( this.videoObjects );
   }
 
+  updateMouse() {
+    this.lMouse.x -= ( this.lMouse.x - this.mouse.x) * 0.05;
+    this.lMouse.y -= ( this.lMouse.y - this.mouse.y ) * 0.05;
+    this.lMouseSpeed.x = this.lMouse.x - this.mouse.x;
+    this.lMouseSpeed.y = this.lMouse.y - this.mouse.y;
+  }
+
   render() {
     window.requestAnimationFrame( this.render.bind( this ) );
     this.time+= 0.05;
+    this.updateMouse();
+
+    this.shaderPass.uniforms.u_mouse.value = this.mouse;
+    this.shaderPass.uniforms.u_mouseSpeed.value = this.lMouseSpeed;
 
     this.controls.movementSpeed = 8.3;
     this.controls.update( this.clock.getDelta() );
@@ -436,9 +444,6 @@ export default class Sketch {
     });
     // this.mesh.position.set(  );
     this.shaderPass.uniforms.u_time.value = this.time / 10.0;
-    this.shaderPass.uniforms.u_moveVector.value = this.controls.moveVector;
-    this.shaderPass.uniforms.u_mouseDampened.value = new THREE.Vector2( this.dampenedMouseX / this.width, (this.height - this.dampenedMouseY) / this.height );
-    this.shaderPass.uniforms.u_dMouse.value = this.dMouse;
 
     this.composer.render();
 
