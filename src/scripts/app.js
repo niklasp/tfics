@@ -81,9 +81,9 @@ export default class Sketch {
     this.matReflectivity = 0.5;
 
     this.renderer = new THREE.WebGLRenderer( {
-      antialias: false,
+      antialias: true,
       alpha: true,
-      autoClear: true,
+      // autoClear: true,
       powerPreference: "high-performance",
       // preserveDrawingBuffer: true,
     } );
@@ -93,8 +93,10 @@ export default class Sketch {
     // this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     // this.renderer.toneMappingExposure = 1;
     // this.renderer.outputEncoding = THREE.sRGBEncoding;
-    this.renderer.shadowMap.enabled = false;
     this.renderer.outputEncoding = THREE.sRGBEncoding;
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    
     this.container.appendChild( this.renderer.domElement );
 
     this.composer = new EffectComposer( this.renderer );
@@ -194,31 +196,32 @@ export default class Sketch {
 
   addLights() {
     const color = new THREE.Color( 0xFFFFFF );
-    const intensity = 0.5;
+    const intensity = 1.0;
     this.light = new THREE.AmbientLight(color, intensity);
     this.scene.add(this.light);
     this.dirLight = new THREE.DirectionalLight(color, intensity );
-    this.dirLight.position.set(0, 10, 0);
+    this.dirLight.position.set(0, -10, 0);
+
     this.scene.add(this.dirLight);
 
-    this.scene.add( new THREE.AmbientLight( 0x222222 ) );
+    this.scene.add( new THREE.AmbientLight( 0xffffff, 1.0 ) );
 
-    const pointLight1 = new THREE.PointLight( 0x22ffff );
-    pointLight1.position.set( 150, 10, 0 );
-    pointLight1.castShadow = false;
-    this.scene.add( pointLight1 );
+    // const pointLight1 = new THREE.PointLight( 0x22ffff );
+    // pointLight1.position.set( 150, 10, 0 );
+    // pointLight1.castShadow = false;
+    // this.scene.add( pointLight1 );
 
-    const pointLight2 = new THREE.PointLight( 0xff22ff );
-    pointLight2.position.set( - 150, 0, 0 );
-    this.scene.add( pointLight2 );
+    // const pointLight2 = new THREE.PointLight( 0xff22ff );
+    // pointLight2.position.set( - 150, 0, 0 );
+    // this.scene.add( pointLight2 );
 
-    const pointLight3 = new THREE.PointLight( 0xfff33f );
-    pointLight3.position.set( 0, - 10, - 150 );
-    this.scene.add( pointLight3 );
+    // const pointLight3 = new THREE.PointLight( 0xfff33f );
+    // pointLight3.position.set( 0, - 10, - 150 );
+    // this.scene.add( pointLight3 );
 
-    const pointLight4 = new THREE.PointLight( 0xf2fff2 );
-    pointLight4.position.set( 0, 0, 150 );
-    this.scene.add( pointLight4 );
+    // const pointLight4 = new THREE.PointLight( 0xf2fff2 );
+    // pointLight4.position.set( 0, 0, 150 );
+    // this.scene.add( pointLight4 );
   }
 
   addGui() {
