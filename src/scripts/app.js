@@ -19,7 +19,7 @@ import VideoElement from './VideoElement';
 import vid1ph from '../models/raumschiff_erde.jpeg';
 
 import theFont from '../static/font3.json';
-import metropolisModel from '../models/untitled.glb';
+import metropolisModel from '../models/assembled17.glb';
 import krabbe from '../models/krabbe.glb';
 
 //import shaders
@@ -59,9 +59,7 @@ export default class Sketch {
     this.scene.opacity = 0.5;
     // this.scene.fog = new THREE.Fog(color, near, far);
     this.camera = new THREE.PerspectiveCamera( 100, this.width / this.height, 0.1, 1000 );
-    this.camera.position.z = 30;
-    this.camera.position.x = 0;
-    this.camera.position.y = 10;
+    this.camera.position.set( 20, 30, 40 );
 
     this.videoIds = [
       'iItaoaRG0NU',
@@ -119,26 +117,37 @@ export default class Sketch {
     };
 
 
-    this.shader = {
-      uniforms: this.materialUniforms,
-      vertexShader,
-      fragmentShader: shiftShader,
-    };
-    this.shaderPass = new ShaderPass( this.shader );
-    this.composer.addPass( this.shaderPass );
+    // this.shader = {
+    //   uniforms: this.materialUniforms,
+    //   vertexShader,
+    //   fragmentShader: shiftShader,
+    // };
+    // this.shaderPass = new ShaderPass( this.shader );
+    // this.composer.addPass( this.shaderPass );
 
 
-    // this.controls = new OrbitControls( this.camera, this.renderer.domElement );
+    this.controls = new OrbitControls( this.camera, this.renderer.domElement );
+    this.controls.enableDamping = true;
+    this.controls.dampingFactor = 0.2;
+    // this.controls.enablePan = false;
+    // this.controls.minPolarAngle = 0;
+    // this.controls.maxPolarAngle = Math.PI;
+    this.controls.autoRotate = true;
+    this.controls.autoRotateSpeed = 0.1;
+    this.controls.rotateSpeed = 0.4;
+    this.controls.minDistance = 10;
+    this.controls.maxDistance = 2000;
+    this.controls.zoomSpeed = 0.3;
 
     // this.controls = new PointerLockControls( this.camera, document.body );
 
-    this.controls = new FlyControls( this.camera, this.renderer.domElement );
+    // this.controls = new FlyControls( this.camera, this.renderer.domElement );
 
-    this.controls.movementSpeed = 1000;
-    this.controls.domElement = this.renderer.domElement;
-    this.controls.rollSpeed = Math.PI / 24;
-    this.controls.autoForward = false;
-    this.controls.dragToLook = false;
+    // this.controls.movementSpeed = 1000;
+    // this.controls.domElement = this.renderer.domElement;
+    // this.controls.rollSpeed = Math.PI / 24;
+    // this.controls.autoForward = false;
+    // this.controls.dragToLook = false;
 
     this.mat = new THREE.MeshPhysicalMaterial( {
       // color: this.matColor,
@@ -165,7 +174,7 @@ export default class Sketch {
     this.resize();
     this.setupListeners();
     this.addObjects();
-    this.addScreens();
+    // this.addScreens();
     this.addMovingText();
     this.addLights();
     this.addGui();
@@ -178,7 +187,7 @@ export default class Sketch {
     this.oldMouseSpeed = this.mouseSpeed;
     this.mouseSpeed = new THREE.Vector2( Math.abs(Math.min((this.mouse.x - this.oldMouse.x) * 10, 1)), Math.abs(Math.min((this.mouse.y - this.oldMouse.y) * 10), 1));
     this.mouseAcc = new THREE.Vector2( (this.mouse.x - e.clientX) - this.mouseSpeed.x , (this.mouse.y - this.height + e.clientY) - this.mouseSpeed.y );
-    this.shaderPass.uniforms.u_mouse.value = this.mouse;
+    // this.shaderPass.uniforms.u_mouse.value = this.mouse;
   }
 
   setupListeners() {
@@ -328,9 +337,12 @@ export default class Sketch {
           }
         } );
 
-        that.city = gltf.scene.children[5];
-        that.city.geometry.center();
-
+        // that.city = gltf.scene.children[5];
+        // that.city.geometry.center();
+        gltf.scene.position.x = -0.05;
+        gltf.scene.position.y = -22.13;
+        gltf.scene.position.z = -0.16;
+        that.city = gltf.scene;
         that.scene.add( that.city );
         loader.style.display = 'none';
       },
@@ -413,10 +425,10 @@ export default class Sketch {
     this.time+= 0.05;
     this.updateMouse();
 
-    this.shaderPass.uniforms.u_mouse.value = this.mouse;
-    this.shaderPass.uniforms.u_mouseSpeed.value = this.lMouseSpeed;
+    // this.shaderPass.uniforms.u_mouse.value = this.mouse;
+    // this.shaderPass.uniforms.u_mouseSpeed.value = this.lMouseSpeed;
 
-    this.controls.movementSpeed = 8.3;
+    // this.controls.movementSpeed = 8.3;
     this.controls.update( this.clock.getDelta() );
 
     this.prevTime = this.time;
@@ -432,7 +444,7 @@ export default class Sketch {
     }
 
     if ( this.city ) {
-      this.city.rotation.y = this.time / 50.0;
+      this.city.rotation.y = -this.time / 70.0;
     }
 
     this.videoObjects.rotation.y = - this.time / 60.0;
@@ -446,7 +458,7 @@ export default class Sketch {
       // mesh.position.set( camPos.x + Math.sin( this.time / 5.0 ) * 20 + idx * 40 - 440, camPos.y + 50 - idx * 8.0, camPos.z - 100 );
     });
     // this.mesh.position.set(  );
-    this.shaderPass.uniforms.u_time.value = this.time / 10.0;
+    // this.shaderPass.uniforms.u_time.value = this.time / 10.0;
 
     this.composer.render();
 
