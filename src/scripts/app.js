@@ -316,24 +316,24 @@ export default class Sketch {
           gltf.scene.traverse( function ( child ) {
           if ( child.material ) {
             // console.log( child.material );
-            child.material.metalness = 0.1;
-            child.material.opacity = 1.0;
-            child.material.reflectivity = 0.2;
-            child.material.roughness = 0.7;
-            child.material.refractionRatio = 0.5;
+            child.material.metalness = 0.5;
+            // child.material.opacity = 1.0;
+            child.material.reflectivity = 0.7;
+            // child.material.roughness = 0.7;
+            // child.material.refractionRatio = 0.5;
             // if ( child.material.color )
               // child.material.copy( that.mat );
-            child.side = THREE.DoubleSide;
+            // child.side = THREE.DoubleSide;
             // child.material.blending = THREE.MultiplyBlending;
-            child.depthTest = false;
+            // child.depthTest = false;
             // child.material.transparent = true;
             // child.material.color = 0xff22ff;
-            child.material.needsUpdate = true;
+            // child.material.needsUpdate = true;
             // child.material.map.needsUpdate = true;
-          if ( child.isMesh ) {
+          // if ( child.isMesh ) {
             // roughnessMipmapper.generateMipmaps( child.material );
-            child.rotation.x = -2 * 3.14;
-          }
+            // child.rotation.x = -2 * 3.14;
+          // }
           }
         } );
 
