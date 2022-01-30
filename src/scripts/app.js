@@ -65,10 +65,10 @@ export default class Sketch {
     const divisions = 10;
     
     const gridHelper = new THREE.GridHelper( size, divisions );
-    this.scene.add( gridHelper );
+    // this.scene.add( gridHelper );
 
     const axesHelper = new THREE.AxesHelper( 50 );
-    this.scene.add( axesHelper );
+    // this.scene.add( axesHelper );
 
     this.videoIds = [
       'iItaoaRG0NU',
