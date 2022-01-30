@@ -11,14 +11,14 @@ import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 import { LuminosityShader } from 'three/examples/jsm/shaders/LuminosityShader.js';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 import { FontLoader, Font } from 'three/examples/jsm/loaders/FontLoader.js';
-// import { RoughnessMipmapper } from 'three/examples/jsm/utils/RoughnessMipmapper.js';
+import { RoughnessMipmapper } from 'three/examples/jsm/utils/RoughnessMipmapper.js';
 
 import * as dat from 'dat.gui';
 import VideoElement from './VideoElement';
 
 import vid1ph from '../models/raumschiff_erde.jpeg';
 
-import theFont from '../static/font3.json';
+import theFont from '../static/metropolis.json';
 import metropolisModel from '../models/assembled17.glb';
 import krabbe from '../models/krabbe.glb';
 
@@ -103,6 +103,8 @@ export default class Sketch {
     this.renderer.outputEncoding = THREE.sRGBEncoding;
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 1;
     
     this.container.appendChild( this.renderer.domElement );
 
@@ -213,8 +215,8 @@ export default class Sketch {
   }
 
   addLights() {
-    const color = new THREE.Color( 0xFFFFFF );
-    const intensity = 1.0;
+    const color = new THREE.Color( 0x27094a );
+    const intensity = 2.0;
     this.light = new THREE.AmbientLight(color, intensity);
     this.scene.add(this.light);
     this.dirLight = new THREE.DirectionalLight(color, intensity );
@@ -264,17 +266,17 @@ export default class Sketch {
     this.meshes = [];
     for ( let i = 0; i<textToShow.length; i++) {
       const glyphMaterial = new THREE.MeshStandardMaterial( {
-        color: 0xff00ff,
-        emissive: 0x000033,
+        color: 0xcc3399,
+        emissive: 0x330033,
         metalness: 1,
         roughness: 0,
       } );
   
       const glyphGeometry = new TextGeometry( textToShow[ i ], {
         font: font,
-        size: 20,
+        size: 30,
         height: 1,
-        curveSegments: 3,
+        curveSegments: 2,
         // bevelEnabled: true,
         // bevelThickness: 3,
         // bevelSize: 2,
@@ -299,6 +301,7 @@ export default class Sketch {
     .setDataType( THREE.UnsignedByteType )
     .load( environment, function ( texture ) {
 
+      // var roughnessMipmapper = new RoughnessMipmapper( that.renderer );
       const pmremGenerator = new THREE.PMREMGenerator( that.renderer );
       pmremGenerator.compileEquirectangularShader();
       const envMap = pmremGenerator.fromEquirectangular( texture ).texture;
@@ -325,19 +328,19 @@ export default class Sketch {
           gltf.scene.traverse( function ( child ) {
           if ( child.material ) {
             // console.log( child.material );
-            child.material.metalness = 0.5;
+            child.material.metalness = 0.1;
             // child.material.opacity = 1.0;
-            child.material.reflectivity = 0.7;
-            // child.material.roughness = 0.7;
-            // child.material.refractionRatio = 0.5;
+            // child.material.reflectivity = 0.7;
+            // child.material.roughness = 1.0;
+            // child.material.refractionRatio = 1.0;
             // if ( child.material.color )
-              // child.material.copy( that.mat );
+            // child.material.copy( that.mat );
             // child.side = THREE.DoubleSide;
             // child.material.blending = THREE.MultiplyBlending;
             // child.depthTest = false;
             // child.material.transparent = true;
             // child.material.color = 0xff22ff;
-            // child.material.needsUpdate = true;
+            child.material.needsUpdate = true;
             // child.material.map.needsUpdate = true;
             if ( child.isMesh ) {
               // roughnessMipmapper.generateMipmaps( child.material );
@@ -348,10 +351,13 @@ export default class Sketch {
 
         // that.city = gltf.scene.children[5];
         // that.city.geometry.center();
-        gltf.scene.position.x = -0.05;
-        gltf.scene.position.y = -22.13;
-        gltf.scene.position.z = -0.16;
+
+        gltf.scene.rotateX( Math.PI );
         that.city = gltf.scene;
+        gltf.scene.position.x = -0.05;
+        gltf.scene.position.y = 36.13;
+        gltf.scene.position.z = -0.16;
+        
         that.scene.add( that.city );
         loader.style.display = 'none';
       },
@@ -379,23 +385,21 @@ export default class Sketch {
     //     new THREE.Vector3(Math.random() * 200 - 100, Math.random() * 200 - 100, Math.random() * 300 - 150)
     //   );
     // }
-    const curveWidth = 48;
-    randomPoints.push( new THREE.Vector3(-curveWidth,-curveWidth/2,-curveWidth) );
+    const curveWidth = 100;
+    randomPoints.push( new THREE.Vector3(-curveWidth,-curveWidth/2,-curveWidth/2) );
     randomPoints.push( new THREE.Vector3(0,0,curveWidth) );
-    randomPoints.push( new THREE.Vector3(curveWidth,curveWidth/2,curveWidth) );
+    randomPoints.push( new THREE.Vector3(curveWidth,-curveWidth/2,curveWidth/2) );
     randomPoints.push( new THREE.Vector3(0,0,-curveWidth) );
     // randomPoints.push( new THREE.Vector3(-curveWidth,-curveWidth/2,-curveWidth) );
     // randomPoints.push( new THREE.Vector3(curveWidth,0,curveWidth) );
     
     this.curve = new THREE.CatmullRomCurve3( randomPoints, true, 'centripetal', 0.9 );
-    const points = this.curve.getPoints( 50 );
-    const geometry = new THREE.BufferGeometry().setFromPoints( points );
+    // const points = this.curve.getPoints( 50 );
+    // const geometry = new THREE.BufferGeometry().setFromPoints( points );
     
-    const material = new THREE.LineBasicMaterial( { color : 0xff33cc } );
-    const splineObject = new THREE.Line( geometry, material );
-    splineObject.translateY(10);
-    splineObject.translateX(30);
-    this.scene.add( splineObject );
+    // const material = new THREE.LineBasicMaterial( { color : 0xaa33cc } );
+    // const splineObject = new THREE.Line( geometry, material );
+    // this.scene.add( splineObject );
 
   }
 
@@ -466,7 +470,7 @@ export default class Sketch {
     // this.mesh.position = camPos;
     // console.log( camPos );
     this.meshes.forEach(( mesh, idx ) => {
-      const camPos = this.curve.getPoint( (this.time / 5.0 + idx * 1.7) / 50);
+      const camPos = this.curve.getPoint( (-this.time / 5.0 - idx * 1.4) / 50);
       mesh.position.set( camPos.x, camPos.y, camPos.z);
       // mesh.position.set( camPos.x + Math.sin( this.time / 5.0 ) * 20 + idx * 40 - 440, camPos.y + 50 - idx * 8.0, camPos.z - 100 );
     });
