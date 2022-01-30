@@ -61,6 +61,15 @@ export default class Sketch {
     this.camera = new THREE.PerspectiveCamera( 100, this.width / this.height, 0.1, 1000 );
     this.camera.position.set( 20, 30, 40 );
 
+    const size = 100;
+    const divisions = 10;
+    
+    const gridHelper = new THREE.GridHelper( size, divisions );
+    this.scene.add( gridHelper );
+
+    const axesHelper = new THREE.AxesHelper( 50 );
+    this.scene.add( axesHelper );
+
     this.videoIds = [
       'iItaoaRG0NU',
       'aUwTFRghE-8',
@@ -263,7 +272,7 @@ export default class Sketch {
   
       const glyphGeometry = new TextGeometry( textToShow[ i ], {
         font: font,
-        size: 10,
+        size: 20,
         height: 1,
         curveSegments: 3,
         // bevelEnabled: true,
@@ -370,19 +379,23 @@ export default class Sketch {
     //     new THREE.Vector3(Math.random() * 200 - 100, Math.random() * 200 - 100, Math.random() * 300 - 150)
     //   );
     // }
-    randomPoints.push( new THREE.Vector3(-18,18,18) );
-    randomPoints.push( new THREE.Vector3(18,18,18) );
-    randomPoints.push( new THREE.Vector3(18,-18,18) );
-    randomPoints.push( new THREE.Vector3(18,-18,-18) );
-    randomPoints.push( new THREE.Vector3(-18,18,-18) );
+    const curveWidth = 48;
+    randomPoints.push( new THREE.Vector3(-curveWidth,-curveWidth/2,-curveWidth) );
+    randomPoints.push( new THREE.Vector3(0,0,curveWidth) );
+    randomPoints.push( new THREE.Vector3(curveWidth,curveWidth/2,curveWidth) );
+    randomPoints.push( new THREE.Vector3(0,0,-curveWidth) );
+    // randomPoints.push( new THREE.Vector3(-curveWidth,-curveWidth/2,-curveWidth) );
+    // randomPoints.push( new THREE.Vector3(curveWidth,0,curveWidth) );
     
-    this.curve = new THREE.CatmullRomCurve3(randomPoints);
+    this.curve = new THREE.CatmullRomCurve3( randomPoints, true, 'centripetal', 0.9 );
     const points = this.curve.getPoints( 50 );
     const geometry = new THREE.BufferGeometry().setFromPoints( points );
     
     const material = new THREE.LineBasicMaterial( { color : 0xff33cc } );
-    // const splineObject = new THREE.Line( geometry, material );
-    // this.scene.add( splineObject );
+    const splineObject = new THREE.Line( geometry, material );
+    splineObject.translateY(10);
+    splineObject.translateX(30);
+    this.scene.add( splineObject );
 
   }
 
