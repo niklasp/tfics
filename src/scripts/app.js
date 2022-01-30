@@ -331,7 +331,7 @@ export default class Sketch {
             // child.material.needsUpdate = true;
             // child.material.map.needsUpdate = true;
             if ( child.isMesh ) {
-              roughnessMipmapper.generateMipmaps( child.material );
+              // roughnessMipmapper.generateMipmaps( child.material );
               // child.rotation.x = -2 * 3.14;
             }
           }
