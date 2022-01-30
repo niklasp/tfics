@@ -12,8 +12,9 @@ import { LuminosityShader } from 'three/examples/jsm/shaders/LuminosityShader.js
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 import { FontLoader, Font } from 'three/examples/jsm/loaders/FontLoader.js';
 import { RoughnessMipmapper } from 'three/examples/jsm/utils/RoughnessMipmapper.js';
+import Stats from 'stats.js';
 
-import * as dat from 'dat.gui';
+import GUI from 'lil-gui';
 import VideoElement from './VideoElement';
 
 import vid1ph from '../models/raumschiff_erde.jpeg';
@@ -81,11 +82,15 @@ export default class Sketch {
 
     this.videoObjects = new THREE.Group();
 
-    this.matMetalness = 1;
+    this.matMetalness = 0;
     this.matColor = new THREE.Color( 0xff22ff );
-    this.matOpacity = 0.5;
-    this.matRoughness = 0.1;
+    this.matOpacity = 1.0;
+    this.matRoughness = 0.0;
     this.matReflectivity = 0.5;
+
+    this.stats = new Stats();
+    this.stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+    document.body.appendChild( this.stats.dom );
 
     this.renderer = new THREE.WebGLRenderer( {
       antialias: true,
@@ -160,14 +165,15 @@ export default class Sketch {
     // this.controls.autoForward = false;
     // this.controls.dragToLook = false;
 
-    this.mat = new THREE.MeshPhysicalMaterial( {
+    this.mat = new THREE.MeshStandardMaterial( {
       // color: this.matColor,
       metalness: this.matMetalness,
       roughness: this.matRoughness,
       opacity: this.matOpacity,
-      side: THREE.BackSide,
+      side: THREE.DoubleSide,
       transparent: true,
-      envMapIntensity: 5,
+      // wireframe: true,
+      // envMapIntensity: 5,
       premultipliedAlpha: true
       // TODO: Add custom blend mode that modulates background color by this materials color.
     } );
@@ -216,15 +222,19 @@ export default class Sketch {
 
   addLights() {
     const color = new THREE.Color( 0x27094a );
-    const intensity = 2.0;
+    const intensity = 10.0;
     this.light = new THREE.AmbientLight(color, intensity);
     this.scene.add(this.light);
     this.dirLight = new THREE.DirectionalLight(color, intensity );
-    this.dirLight.position.set(0, -10, 0);
+    this.dirLight.position.set(0, 10, 0);
 
     this.scene.add(this.dirLight);
 
     this.scene.add( new THREE.AmbientLight( 0xffffff, 1.0 ) );
+
+    const light = new THREE.PointLight( 0xff0000, 1, 100 );
+    light.position.set( 50, 50, 50 );
+    this.scene.add( light );
 
     // const pointLight1 = new THREE.PointLight( 0x22ffff );
     // pointLight1.position.set( 150, 10, 0 );
@@ -245,14 +255,59 @@ export default class Sketch {
   }
 
   addGui() {
-    const gui = new dat.GUI();
-    gui.addColor(new ColorGUIHelper(this.light, 'color'), 'value').name('color');
-    gui.add(this.light, 'intensity', 0, 2, 0.01);
-    // gui.add(this, 'matMetalness', 0, 2, 0.01 );
-    // gui.add(this.mat, 'roughness', 0, 2, 0.01 );
-    // gui.add(this.mat, 'reflectivity', 0, 2, 0.01 );
-    // gui.add(this.mat, 'roughness', 0, 2, 0.01 );
-    // gui.add(this.mat, 'opacity', 0, 2, 0.01 );
+    const gui = new GUI();
+    const that = this;
+    gui.add( document, 'controls' );
+    const objFolder = gui.addFolder( '3d object' );
+    objFolder.add(this.mat, 'metalness', 0, 2, 0.01 ).onChange( ( val ) => {
+      that.city.traverse( ( child ) => {
+        if ( child.isMesh ) {
+          child.material.metalness = val;
+
+          child.material.needsUpdate = true;
+        }
+      } );
+    });
+    objFolder.add(this.mat, 'roughness', 0, 2, 0.01 ).onChange( ( val ) => {
+      that.city.traverse( ( child ) => {
+        if ( child.isMesh ) {
+          child.material.roughness = val;
+          child.material.needsUpdate = true;
+        }
+      } );
+    });
+    objFolder.add(this.mat, 'opacity', 0, 2, 0.01 ).onChange( ( val ) => {
+      that.city.traverse( ( child ) => {
+        if ( child.isMesh ) {
+          child.material.opacity = val;
+          child.material.needsUpdate = true;
+        }
+      } );
+    });
+    objFolder.add(this.mat, 'wireframe' ).onChange( ( val ) => {
+      that.city.traverse( ( child ) => {
+        if ( child.isMesh ) {
+          child.material.wireframe = val;
+          child.material.needsUpdate = true;
+        }
+      } );
+    });
+    objFolder.addColor(this.mat, 'color' ).onChange( ( val ) => {
+      that.city.traverse( ( child ) => {
+        if ( child.isMesh ) {
+          child.material.color = val;
+          child.material.needsUpdate = true;
+        }
+      } );
+    });
+    objFolder.addColor(this.mat, 'emissive' ).onChange( ( val ) => {
+      that.city.traverse( ( child ) => {
+        if ( child.isMesh ) {
+          child.material.emissive = val;
+          child.material.needsUpdate = true;
+        }
+      } );
+    });
   }
 
   addObjects() {
@@ -267,7 +322,7 @@ export default class Sketch {
     for ( let i = 0; i<textToShow.length; i++) {
       const glyphMaterial = new THREE.MeshStandardMaterial( {
         color: 0xcc3399,
-        emissive: 0x330033,
+        emissive: 0x110011,
         metalness: 1,
         roughness: 0,
       } );
@@ -275,11 +330,11 @@ export default class Sketch {
       const glyphGeometry = new TextGeometry( textToShow[ i ], {
         font: font,
         size: 30,
-        height: 1,
+        height: 10,
         curveSegments: 2,
         // bevelEnabled: true,
-        // bevelThickness: 3,
-        // bevelSize: 2,
+        // bevelThickness: 0.1,
+        // bevelSize: 0.8,
         // bevelOffset: 0,
         // bevelSegments: 2
       } );
@@ -329,6 +384,7 @@ export default class Sketch {
           if ( child.material ) {
             // console.log( child.material );
             child.material.metalness = 0.1;
+            child.material.envMap = envMap;
             // child.material.opacity = 1.0;
             // child.material.reflectivity = 0.7;
             // child.material.roughness = 1.0;
@@ -438,7 +494,7 @@ export default class Sketch {
   }
 
   render() {
-    window.requestAnimationFrame( this.render.bind( this ) );
+
     this.time+= 0.05;
     this.updateMouse();
 
@@ -470,28 +526,19 @@ export default class Sketch {
     // this.mesh.position = camPos;
     // console.log( camPos );
     this.meshes.forEach(( mesh, idx ) => {
-      const camPos = this.curve.getPoint( (-this.time / 5.0 - idx * 1.4) / 50);
+      const camPos = this.curve.getPoint( (-this.time / 5.0 - idx * 1.9) / 50);
       mesh.position.set( camPos.x, camPos.y, camPos.z);
       // mesh.position.set( camPos.x + Math.sin( this.time / 5.0 ) * 20 + idx * 40 - 440, camPos.y + 50 - idx * 8.0, camPos.z - 100 );
     });
     // this.mesh.position.set(  );
     // this.shaderPass.uniforms.u_time.value = this.time / 10.0;
 
+    this.stats.begin();
     this.composer.render();
+    this.stats.end();
+
+    window.requestAnimationFrame( this.render.bind( this ) );
 
     // console.log( this.camera.rotation );
-  }
-}
-
-class ColorGUIHelper {
-  constructor(object, prop) {
-    this.object = object;
-    this.prop = prop;
-  }
-  get value() {
-    return `#${this.object[this.prop].getHexString()}`;
-  }
-  set value(hexString) {
-    this.object[this.prop].set(hexString);
   }
 }
