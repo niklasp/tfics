@@ -12,6 +12,7 @@ import { LuminosityShader } from 'three/examples/jsm/shaders/LuminosityShader.js
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 import { FontLoader, Font } from 'three/examples/jsm/loaders/FontLoader.js';
 import { RoughnessMipmapper } from 'three/examples/jsm/utils/RoughnessMipmapper.js';
+import { TWEEN } from 'three/examples/jsm/libs/tween.module.min';
 import Stats from 'stats.js';
 
 import GUI from 'lil-gui';
@@ -20,7 +21,9 @@ import VideoElement from './VideoElement';
 import vid1ph from '../models/raumschiff_erde.jpeg';
 
 import theFont from '../static/metropolis.json';
+// import metropolisModel from '../models/untitled2.glb';
 import metropolisModel from '../models/assembled17.glb';
+// import metropolisModel from '../models/sm4.glb';
 import krabbe from '../models/krabbe.glb';
 
 //import shaders
@@ -44,6 +47,8 @@ export default class Sketch {
     this.width = this.container.offsetWidth;
     this.height = this.container.offsetHeight;
 
+    this.INTERSECTED = null;
+
     this.mouse = new THREE.Vector2( 0.0, 0.0 );
     this.mouseSpeed = new THREE.Vector2( 0.0, 0.0 );
     this.oldMouseSpeed = new THREE.Vector2( 0.0, 0.0 );
@@ -60,7 +65,12 @@ export default class Sketch {
     this.scene.opacity = 0.5;
     // this.scene.fog = new THREE.Fog(color, near, far);
     this.camera = new THREE.PerspectiveCamera( 100, this.width / this.height, 0.1, 1000 );
-    this.camera.position.set( 20, 30, 40 );
+    // this.camera.position.set( 20, 30, 50 );
+    
+
+    this.appParams = {
+      zoomedOut: false,
+    };
 
     const size = 100;
     const divisions = 10;
@@ -82,10 +92,10 @@ export default class Sketch {
 
     this.videoObjects = new THREE.Group();
 
-    this.matMetalness = 0;
+    this.matMetalness = 0.7;
     this.matColor = new THREE.Color( 0xff22ff );
     this.matOpacity = 1.0;
-    this.matRoughness = 0.0;
+    this.matRoughness = 0.33;
     this.matReflectivity = 0.5;
 
     this.stats = new Stats();
@@ -99,9 +109,10 @@ export default class Sketch {
       powerPreference: "high-performance",
       // preserveDrawingBuffer: true,
     } );
+    
     // this.renderer.autoClearColor = false;
     this.renderer.setSize( this.width, this.height );
-    // this.renderer.setClearColor(0x000000, 0.1);
+    this.renderer.setClearColor(0xffffff, 0.1);
     // this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     // this.renderer.toneMappingExposure = 1;
     // this.renderer.outputEncoding = THREE.sRGBEncoding;
@@ -152,8 +163,9 @@ export default class Sketch {
     this.controls.autoRotateSpeed = 0.1;
     this.controls.rotateSpeed = 0.4;
     this.controls.minDistance = 10;
-    this.controls.maxDistance = 2000;
-    this.controls.zoomSpeed = 0.3;
+    this.controls.maxDistance = 1500;
+    this.controls.zoomSpeed = 0.1;
+    this.controls.object.position.set(40,20,50);
 
     // this.controls = new PointerLockControls( this.camera, document.body );
 
@@ -188,6 +200,8 @@ export default class Sketch {
     //   roughness: 0.1,
     // });
 
+    this.raycaster = new THREE.Raycaster();
+
     this.resize();
     this.setupListeners();
     this.addObjects();
@@ -198,18 +212,76 @@ export default class Sketch {
     this.render();
   }
 
+  handleInteraction() {
+    const that = this;
+    // console.log( 'handleInteraction');
+    if (new Date() - that.clickTime > 150) {
+      // console.log( 'time' );
+      return;
+    }
+    
+    this.intersects = this.raycaster.intersectObjects( this.scene.children );
+
+    for ( let i = 0; i < this.intersects.length; i ++ ) {
+      console.log( this.intersects );
+      if (that.intersects[ i ].object.name.length ) {
+      }
+    }
+  }
+
   onMouseMove( e ) {
     this.oldMouse = this.mouse;
     this.mouse = new THREE.Vector2( e.clientX / this.width , ( this.height - e.clientY ) / this.height );
-    this.oldMouseSpeed = this.mouseSpeed;
-    this.mouseSpeed = new THREE.Vector2( Math.abs(Math.min((this.mouse.x - this.oldMouse.x) * 10, 1)), Math.abs(Math.min((this.mouse.y - this.oldMouse.y) * 10), 1));
-    this.mouseAcc = new THREE.Vector2( (this.mouse.x - e.clientX) - this.mouseSpeed.x , (this.mouse.y - this.height + e.clientY) - this.mouseSpeed.y );
+    // this.oldMouseSpeed = this.mouseSpeed;
+    // this.mouseSpeed = new THREE.Vector2( Math.abs(Math.min((this.mouse.x - this.oldMouse.x) * 10, 1)), Math.abs(Math.min((this.mouse.y - this.oldMouse.y) * 10), 1));
+    // this.mouseAcc = new THREE.Vector2( (this.mouse.x - e.clientX) - this.mouseSpeed.x , (this.mouse.y - this.height + e.clientY) - this.mouseSpeed.y );
     // this.shaderPass.uniforms.u_mouse.value = this.mouse;
   }
 
   setupListeners() {
-    document.addEventListener( 'mousemove', this.onMouseMove.bind( this ) );
+    this.container.addEventListener( 'mousemove', this.onMouseMove.bind( this ) );
     window.addEventListener( 'resize', this.resize.bind( this ) );
+
+    this.container.addEventListener( 'mousedown', () => {
+      this.clickTime = new Date();
+    });
+
+    this.container.addEventListener( 'touchstart', () => {
+      this.clickTime = new Date();
+    });
+
+    this.container.addEventListener( 'click', this.handleInteraction.bind( this ) );
+  }
+
+  onClick() {
+    if ( ! this.appParams.zoomedOut ) {
+      console.log( 'case not zoomed' );
+      this.appParams.zoomedOut = true;
+      const t = new TWEEN.Tween( this.controls.object.position )
+      .to( {
+        z: 1500 }, 5000 )
+      .easing(TWEEN.Easing.Quadratic.Out)
+      .onUpdate( ( z ) => {
+      })
+      .onComplete( () => {
+      
+      }).start();
+    } else {
+      console.log( 'case zoomed' );
+      this.appParams.zoomedOut = false;
+      const t = new TWEEN.Tween( this.controls.object.position )
+      .to( {
+        x: 40,
+        y: 20,
+        z: 50,
+      }, 5000 )
+      .easing(TWEEN.Easing.Quadratic.Out)
+      .onUpdate( ( z ) => {
+      })
+      .onComplete( () => {
+      
+      }).start();
+    }
   }
 
   resize() {
@@ -228,13 +300,13 @@ export default class Sketch {
     this.dirLight = new THREE.DirectionalLight(color, intensity );
     this.dirLight.position.set(0, 10, 0);
 
-    this.scene.add(this.dirLight);
+    // this.scene.add( this.dirLight );
 
     this.scene.add( new THREE.AmbientLight( 0xffffff, 1.0 ) );
 
-    const light = new THREE.PointLight( 0xff0000, 1, 100 );
-    light.position.set( 50, 50, 50 );
-    this.scene.add( light );
+    // const light = new THREE.PointLight( 0xff0000, 1, 100 );
+    // light.position.set( 50, 50, 50 );
+    // this.scene.add( light );
 
     // const pointLight1 = new THREE.PointLight( 0x22ffff );
     // pointLight1.position.set( 150, 10, 0 );
@@ -318,7 +390,7 @@ export default class Sketch {
 
     const textToShow = 'the future is coming soon';
     this.fontGeometries = [];
-    this.meshes = [];
+    this.fontMeshes = [];
     for ( let i = 0; i<textToShow.length; i++) {
       const glyphMaterial = new THREE.MeshStandardMaterial( {
         color: 0xcc3399,
@@ -341,7 +413,8 @@ export default class Sketch {
 
       this.fontGeometries.push( glyphGeometry );
       const theMesh = new THREE.Mesh( glyphGeometry, glyphMaterial );
-      this.meshes.push( theMesh );
+      theMesh.name = textToShow[ i ];
+      this.fontMeshes.push( theMesh );
       this.scene.add( theMesh );
     }
     // fontLoader.load( fontLoader.parse( theFont ), function ( font ) {
@@ -361,8 +434,28 @@ export default class Sketch {
       pmremGenerator.compileEquirectangularShader();
       const envMap = pmremGenerator.fromEquirectangular( texture ).texture;
       // console.log( envMap.mesh, envMap.material );
-      that.scene.background = envMap;
+      that.scene.background = null;
       that.scene.environment = envMap;
+
+      that.sphereGeometry = new THREE.SphereGeometry( 500, 60, 40 );
+      // invert the geometry on the x-axis so that all of the faces point inward
+      that.sphereGeometry.scale( - 1, 1, 1 );
+      that.material = new THREE.MeshBasicMaterial( {
+        color: 0xffffff,
+        envMap: envMap,
+      } );
+      that.bgMesh = new THREE.Mesh( that.sphereGeometry, that.material );
+      that.bgMesh.material.color.set( {r:255, g:255, b:255 } );
+      that.scene.add( that.bgMesh );
+      // let bgGeom = THREE.SphereGeometry( 100, 60, 40 );
+      // const bgMat = THREE.MeshBasicMaterial( {
+      //   color: 0xffff22,
+      //   // map: envMap,
+      //   side: THREE.DoubleSide
+      // });
+      // const bgMesh = new THREE.Mesh( bgGeom, bgMat );
+      // that.scene.add( bgMesh );
+      // bgGeom = new THREE.SphereGeometry( 870, 60, 40 );
       // that.scene.environment.
       // console.log( that.scene, that.scene.environment, that.scene.material, that.scene.environment.material, that.scene.background.mesh );
 
@@ -381,13 +474,16 @@ export default class Sketch {
           console.log( gltf );
           gltf.scene.scale.set(3,3,3);
           gltf.scene.traverse( function ( child ) {
-          if ( child.material ) {
+          if ( child.isMesh ) {
+            child.name = 'model';
+            console.log( 'is a mesh', child );
+            
             // console.log( child.material );
-            child.material.metalness = 0.1;
+            child.material.metalness = 0.7;
             child.material.envMap = envMap;
             // child.material.opacity = 1.0;
             // child.material.reflectivity = 0.7;
-            // child.material.roughness = 1.0;
+            child.material.roughness = .33;
             // child.material.refractionRatio = 1.0;
             // if ( child.material.color )
             // child.material.copy( that.mat );
@@ -497,12 +593,14 @@ export default class Sketch {
 
     this.time+= 0.05;
     this.updateMouse();
+    this.camera.updateMatrixWorld();
+    this.controls.update( this.clock.getDelta() );
 
     // this.shaderPass.uniforms.u_mouse.value = this.mouse;
     // this.shaderPass.uniforms.u_mouseSpeed.value = this.lMouseSpeed;
 
     // this.controls.movementSpeed = 8.3;
-    this.controls.update( this.clock.getDelta() );
+
 
     this.prevTime = this.time;
     // this.mesh.rotation.x = this.time / 10;
@@ -525,18 +623,52 @@ export default class Sketch {
     // let camRot = this.cugetTangent(this.time / 10000);
     // this.mesh.position = camPos;
     // console.log( camPos );
-    this.meshes.forEach(( mesh, idx ) => {
+    this.fontMeshes.forEach(( mesh, idx ) => {
       const camPos = this.curve.getPoint( (-this.time / 5.0 - idx * 1.9) / 50);
       mesh.position.set( camPos.x, camPos.y, camPos.z);
+      // mesh.rotation.y = -this.time / 70.0 * ( idx % 2 );
       // mesh.position.set( camPos.x + Math.sin( this.time / 5.0 ) * 20 + idx * 40 - 440, camPos.y + 50 - idx * 8.0, camPos.z - 100 );
     });
     // this.mesh.position.set(  );
     // this.shaderPass.uniforms.u_time.value = this.time / 10.0;
 
+    this.raycaster.setFromCamera( this.mouse, this.camera );
+
+    TWEEN.update();
+
+    this.intersects = this.raycaster.intersectObjects( this.scene.children, false );
+    // console.log( this)
+    if ( this.intersects.length > 0 ) {
+
+      if ( this.INTERSECTED != this.intersects[ 0 ].object ) {
+        this.INTERSECTED = this.intersects[ 0 ].object;
+
+        console.log( this.INTERSECTED );
+
+        if ( this.INTERSECTED && this.INTERSECTED.material && this.INTERSECTED.material.emissive ) {
+          // this.INTERSECTED.material.emissive.setHex( this.INTERSECTED.currentHex );
+          // this.INTERSECTED.currentHex = this.INTERSECTED.material.emissive.getHex();
+          // this.INTERSECTED.material.emissive.setHex( 0xff0000 );
+        }
+
+
+        // this.INTERSECTED = this.intersects[ 0 ].object;
+
+      }
+
+    } else {
+
+      if ( this.INTERSECTED ) this.INTERSECTED.material.emissive.setHex( this.INTERSECTED.currentHex );
+
+      this.INTERSECTED = null;
+
+    }
+
+
     this.stats.begin();
     this.composer.render();
     this.stats.end();
-
+    
     window.requestAnimationFrame( this.render.bind( this ) );
 
     // console.log( this.camera.rotation );
