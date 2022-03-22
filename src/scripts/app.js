@@ -677,7 +677,6 @@ export default class Sketch {
 
     // this.controls.movementSpeed = 8.3;
 
-
     this.prevTime = this.time;
     // this.mesh.rotation.x = this.time / 10;
     // this.mesh.rotation.y = this.time / 30;
