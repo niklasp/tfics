@@ -224,7 +224,8 @@ export default class Sketch {
 
     this.resize();
     this.setupListeners();
-    // this.addObjects();
+    this.addFont();
+    this.addObjects();
     this.initYoutube();
     // this.addScreens();
     this.addPlanets();
@@ -314,6 +315,7 @@ export default class Sketch {
     if ( ! this.appParams.zoomedOut ) {
       console.log( 'case not zoomed' );
       this.appParams.zoomedOut = true;
+      this.playYt();
       const t = new TWEEN.Tween( this.controls.object.position )
       .to( {
         z: 1500 }, 4000 )
@@ -321,7 +323,7 @@ export default class Sketch {
       .onUpdate( ( z ) => {
       })
       .onComplete( () => {
-        this.playYt();
+
       }).start();
     } else {
       console.log( 'case zoomed' );
@@ -440,10 +442,7 @@ export default class Sketch {
     });
   }
 
-  addObjects() {
-
-    const that = this;
-
+  addFont() {
     const font = new Font( theFont );
 
     const textToShow = 'the future is coming soon';
@@ -459,8 +458,8 @@ export default class Sketch {
   
       const glyphGeometry = new TextGeometry( textToShow[ i ], {
         font: font,
-        size: 30,
-        height: 10,
+        size: 20,
+        height: 7,
         curveSegments: 2,
         // bevelEnabled: true,
         // bevelThickness: 0.1,
@@ -472,9 +471,15 @@ export default class Sketch {
       this.fontGeometries.push( glyphGeometry );
       const theMesh = new THREE.Mesh( glyphGeometry, glyphMaterial );
       theMesh.name = textToShow[ i ];
+      theMesh.lookAt( 0, 0, 0 );
       this.fontMeshes.push( theMesh );
       this.scene.add( theMesh );
     }
+  }
+
+  addObjects() {
+
+    const that = this;
     // fontLoader.load( fontLoader.parse( theFont ), function ( font ) {
       // this.geometry = 
     // } );
@@ -527,57 +532,58 @@ export default class Sketch {
       const loader = document.getElementById('loader');
       that.loader = new GLTFLoader();
       that.loader.setDRACOLoader( dracoLoader );
-      that.loader.load( metropolisModel,
-        function ( gltf ) {
-          console.log( gltf );
-          gltf.scene.scale.set(3,3,3);
-          gltf.scene.traverse( function ( child ) {
-          if ( child.isMesh ) {
-            // child.name = 'model';
-            console.log( 'is a mesh', child );
-            
-            // console.log( child.material );
-            child.material.metalness = 0.7;
-            child.material.envMap = envMap;
-            // child.material.opacity = 1.0;
-            // child.material.reflectivity = 0.7;
-            child.material.roughness = .33;
-            // child.material.refractionRatio = 1.0;
-            // if ( child.material.color )
-            // child.material.copy( that.mat );
-            // child.side = THREE.DoubleSide;
-            // child.material.blending = THREE.MultiplyBlending;
-            // child.depthTest = false;
-            // child.material.transparent = true;
-            child.material.color = that.matColor;
-            child.material.needsUpdate = true;
-            // child.material.map.needsUpdate = true;
+      if ( false ) {
+        that.loader.load( metropolisModel,
+          function ( gltf ) {
+            console.log( gltf );
+            gltf.scene.scale.set(3,3,3);
+            gltf.scene.traverse( function ( child ) {
             if ( child.isMesh ) {
-              // roughnessMipmapper.generateMipmaps( child.material );
-              // child.rotation.x = -2 * 3.14;
+              // child.name = 'model';
+              console.log( 'is a mesh', child );
+              
+              // console.log( child.material );
+              child.material.metalness = 0.7;
+              child.material.envMap = envMap;
+              // child.material.opacity = 1.0;
+              // child.material.reflectivity = 0.7;
+              child.material.roughness = .33;
+              // child.material.refractionRatio = 1.0;
+              // if ( child.material.color )
+              // child.material.copy( that.mat );
+              // child.side = THREE.DoubleSide;
+              // child.material.blending = THREE.MultiplyBlending;
+              // child.depthTest = false;
+              // child.material.transparent = true;
+              child.material.color = that.matColor;
+              child.material.needsUpdate = true;
+              // child.material.map.needsUpdate = true;
+              if ( child.isMesh ) {
+                // roughnessMipmapper.generateMipmaps( child.material );
+                // child.rotation.x = -2 * 3.14;
+              }
             }
-          }
-        } );
+          } );
 
-        // that.city = gltf.scene.children[5];
-        // that.city.geometry.center();
+          // that.city = gltf.scene.children[5];
+          // that.city.geometry.center();
 
-        gltf.scene.rotateX( Math.PI );
-        that.city = gltf.scene;
-        gltf.scene.position.x = -0.05;
-        gltf.scene.position.y = 36.13;
-        gltf.scene.position.z = -0.16;
-        
-        that.scene.add( that.city );
-        loader.style.display = 'none';
-      },
-      function ( xhr ) {
-        loader.innerText = 'loading...';
-      },
-      function ( error ) {
-        console.log( 'An error happened', error );
-      });
-
+          gltf.scene.rotateX( Math.PI );
+          that.city = gltf.scene;
+          gltf.scene.position.x = -0.05;
+          gltf.scene.position.y = 36.13;
+          gltf.scene.position.z = -0.16;
+          
+          that.scene.add( that.city );
+          loader.style.display = 'none';
+        },
+        function ( xhr ) {
+          loader.innerText = 'loading...';
+        },
+        function ( error ) {
+          console.log( 'An error happened', error );
+        });
+      }
       // that.loader.load( krabbe,
       //   function ( gltf ) {
       //     console.log( 'krabbe', gltf );
@@ -595,7 +601,7 @@ export default class Sketch {
     //     new THREE.Vector3(Math.random() * 200 - 100, Math.random() * 200 - 100, Math.random() * 300 - 150)
     //   );
     // }
-    const curveWidth = 100;
+    const curveWidth = 200;
     randomPoints.push( new THREE.Vector3(-curveWidth,-curveWidth/2,-curveWidth/2) );
     randomPoints.push( new THREE.Vector3(0,0,curveWidth) );
     randomPoints.push( new THREE.Vector3(curveWidth,-curveWidth/2,curveWidth/2) );
@@ -699,7 +705,7 @@ export default class Sketch {
     // this.mesh.position = camPos;
     // console.log( camPos );
     this.fontMeshes.forEach(( mesh, idx ) => {
-      const camPos = this.curve.getPoint( (-this.time / 5.0 - idx * 1.9) / 50);
+      const camPos = this.curve.getPoint( (-this.time / 5.0 - idx * 1.1) / 50);
       mesh.position.set( camPos.x, camPos.y, camPos.z);
       // mesh.rotation.y = -this.time / 70.0 * ( idx % 2 );
       // mesh.position.set( camPos.x + Math.sin( this.time / 5.0 ) * 20 + idx * 40 - 440, camPos.y + 50 - idx * 8.0, camPos.z - 100 );
