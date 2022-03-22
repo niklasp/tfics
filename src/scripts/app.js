@@ -458,8 +458,8 @@ export default class Sketch {
   
       const glyphGeometry = new TextGeometry( textToShow[ i ], {
         font: font,
-        size: 20,
-        height: 7,
+        size: 29,
+        height: 17,
         curveSegments: 2,
         // bevelEnabled: true,
         // bevelThickness: 0.1,
@@ -707,6 +707,7 @@ export default class Sketch {
     this.fontMeshes.forEach(( mesh, idx ) => {
       const camPos = this.curve.getPoint( (-this.time / 5.0 - idx * 1.1) / 50);
       mesh.position.set( camPos.x, camPos.y, camPos.z);
+      mesh.lookAt( this.controls.object.position );
       // mesh.rotation.y = -this.time / 70.0 * ( idx % 2 );
       // mesh.position.set( camPos.x + Math.sin( this.time / 5.0 ) * 20 + idx * 40 - 440, camPos.y + 50 - idx * 8.0, camPos.z - 100 );
     });

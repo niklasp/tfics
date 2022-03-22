@@ -13,10 +13,11 @@ yarn.lock
 .yarnclean
 .vscode
 .idea
-<<<<<<< HEAD
 tmp
-=======
->>>>>>> c346e6ee596528b32a2799ae2016c88df7db2169
+.blend
+src/models/assembled17.glb
+src/models/untitled.glb
+
 
 # Local Netlify folder
 .netlify
