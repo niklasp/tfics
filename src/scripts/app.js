@@ -16,6 +16,9 @@ import { TWEEN } from 'three/examples/jsm/libs/tween.module.min';
 import Stats from 'stats.js';
 
 import GUI from 'lil-gui';
+
+import YouTubePlayer from 'youtube-player';
+
 import VideoElement from './VideoElement';
 
 import vid1ph from '../models/raumschiff_erde.jpeg';
@@ -122,6 +125,22 @@ export default class Sketch {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1;
+
+    this.ytIndex = 0;
+    this.ytIds = [
+      'DkjMYlPEpOc',
+      '98WltKGjwss',
+      '3jaZajrxKU8',
+      'beiQToIZFN8',
+      'GqLWSsi_uhE',
+    ];
+    this.ytProgress = [
+      0,
+      0,
+      0,
+      0,
+      0,
+    ];
     
     this.container.appendChild( this.renderer.domElement );
 
@@ -206,12 +225,41 @@ export default class Sketch {
     this.resize();
     this.setupListeners();
     this.addObjects();
+    this.initYoutube();
     // this.addScreens();
     this.addPlanets();
     this.addMovingText();
     this.addLights();
     this.addGui();
     this.render();
+  }
+
+  initYoutube() {
+    this.player = new YouTubePlayer('ytplayer', {
+      playerVars: {
+        controls: 0,
+        fs: 0,
+        modestbranding: 1,
+        showinfo: 0,
+      }
+    });
+    // 'loadVideoById' is queued until the player is ready to receive API calls.
+    
+    this.player.on('stateChange', (e) => {
+      console.log( 'State changed, ', e );
+    });
+  }
+
+  playYt( ) {
+    // arguments : index, startseconds
+    this.player.loadVideoById( this.ytIds[ this.ytIndex ], this.ytProgress[ this.ytIndex ] );
+    this.player.playVideo();
+  }
+
+  async pauseYt( ) {
+    this.ytProgress[ this.ytIndex ] = await this.player.getCurrentTime();
+    console.log( 'set the time to ', this.ytProgress );
+    this.player.pauseVideo();
   }
 
   handleInteraction() {
@@ -226,9 +274,9 @@ export default class Sketch {
 
     // for ( let i = 0; i < this.intersects.length; i ++ ) {
     //   console.log( this.intersects );
-      if ( that.intersects.length && that.intersects[ 0 ].object.name.length ) {
+      // if ( that.intersects.length && that.intersects[ 0 ].object.name.length ) {
         that.onClick();
-      }
+      // }
     // }
   }
 
@@ -256,6 +304,10 @@ export default class Sketch {
     });
 
     this.container.addEventListener( 'click', this.handleInteraction.bind( this ) );
+
+    document.querySelector('.yt-wrap').addEventListener( 'click', () => {
+      this.pauseYt();
+    });
   }
 
   onClick() {
@@ -264,22 +316,23 @@ export default class Sketch {
       this.appParams.zoomedOut = true;
       const t = new TWEEN.Tween( this.controls.object.position )
       .to( {
-        z: 1500 }, 5000 )
+        z: 1500 }, 4000 )
       .easing(TWEEN.Easing.Quadratic.Out)
       .onUpdate( ( z ) => {
       })
       .onComplete( () => {
-      
+        this.playYt();
       }).start();
     } else {
       console.log( 'case zoomed' );
       this.appParams.zoomedOut = false;
+      this.pauseYt();
       const t = new TWEEN.Tween( this.controls.object.position )
       .to( {
         x: 40,
         y: 20,
         z: 50,
-      }, 5000 )
+      }, 4000 )
       .easing(TWEEN.Easing.Quadratic.Out)
       .onUpdate( ( z ) => {
       })
@@ -666,7 +719,7 @@ export default class Sketch {
 
       if ( this.INTERSECTED != this.intersects[ 0 ].object ) {
 
-        if ( this.INTERSECTED && this.INTERSECTED.material && this.INTERSECTED.material.emissive ) {
+        if ( this.INTERSECTED && this.INTERSECTED.material && this.INTERSECTED.material.emissive && this.INTERSECTED.material && this.INTERSECTED.material.emissive ) {
           this.INTERSECTED.material.emissive.setHex( this.INTERSECTED.currentHex );
           this.INTERSECTED.material.needsUpdate = true;
         }
@@ -694,7 +747,7 @@ export default class Sketch {
 
     } else { 
 
-      if ( this.INTERSECTED ) this.INTERSECTED.material.emissive.setHex( this.INTERSECTED.currentHex );
+      if ( this.INTERSECTED && this.INTERSECTED.material && this.INTERSECTED.material.emissive ) this.INTERSECTED.material.emissive.setHex( this.INTERSECTED.currentHex );
       this.INTERSECTED = null;
 
     }
