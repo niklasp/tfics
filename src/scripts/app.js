@@ -224,7 +224,7 @@ export default class Sketch {
 
     this.resize();
     this.setupListeners();
-    this.addObjects();
+    // this.addObjects();
     this.initYoutube();
     // this.addScreens();
     this.addPlanets();
