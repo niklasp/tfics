@@ -27,8 +27,10 @@ import theFont from '../static/metropolis.json';
 // import metropolisModel from '../models/untitled2.glb';
 // import metropolisModel from '../models/assembled17.glb';
 import metropolisModel from '../models/mitobjekten.glb';
+import ant from '../models/lowpoly_ant/ant.glb';
 import krabbe from '../models/krabbe.glb';
- 
+import '../models/omegapunkt.mp4';
+
 //import shaders
 import vertexShader from '../shaders/vertex.glsl';
 import fragmentShader from '../shaders/fragment.glsl';
@@ -275,9 +277,12 @@ export default class Sketch {
 
     // for ( let i = 0; i < this.intersects.length; i ++ ) {
     //   console.log( this.intersects );
-      // if ( that.intersects.length && that.intersects[ 0 ].object.name.length ) {
+      if ( that.intersects.length && that.intersects[ 0 ].object.name.length || that.appParams.zoomedOut ) {
+        const n = that.intersects[ 0 ].object.name;
+        const idx = n.split('-')[1];
+        that.ytIndex = idx;
         that.onClick();
-      // }
+      }
     // }
   }
 
@@ -532,6 +537,17 @@ export default class Sketch {
       const loader = document.getElementById('loader');
       that.loader = new GLTFLoader();
       that.loader.setDRACOLoader( dracoLoader );
+
+      that.loader.load( ant, ( gltf ) => {
+        const realAnt = gltf.scene.children[0];
+        realAnt.name = 'interactive-1';
+        realAnt.material.metalness = 0.7;
+        realAnt.material.roughness = .33;
+        realAnt.material.envMap = envMap;
+        realAnt.material.color.setHex( 0x00ffff );
+        that.scene.add( realAnt );
+      });
+
       if ( false ) {
         that.loader.load( metropolisModel,
           function ( gltf ) {
@@ -633,7 +649,7 @@ export default class Sketch {
     const mesh = new THREE.Mesh(geom, mat);
     mesh.position.set( 10, -50, 20 );
     mesh.rotation.z = Math.PI / 6;
-    mesh.name = 'planet 1';
+    mesh.name = 'planet-4';
     this.planets.push( mesh );
     this.scene.add( mesh );
   }
@@ -707,7 +723,7 @@ export default class Sketch {
     this.fontMeshes.forEach(( mesh, idx ) => {
       const camPos = this.curve.getPoint( (-this.time / 5.0 - idx * 1.1) / 50);
       mesh.position.set( camPos.x, camPos.y, camPos.z);
-      mesh.lookAt( this.controls.object.position );
+      mesh.lookAt( 0,0,0 );
       // mesh.rotation.y = -this.time / 70.0 * ( idx % 2 );
       // mesh.position.set( camPos.x + Math.sin( this.time / 5.0 ) * 20 + idx * 40 - 440, camPos.y + 50 - idx * 8.0, camPos.z - 100 );
     });
@@ -726,25 +742,30 @@ export default class Sketch {
       if ( this.INTERSECTED != this.intersects[ 0 ].object ) {
 
         if ( this.INTERSECTED && this.INTERSECTED.material && this.INTERSECTED.material.emissive && this.INTERSECTED.material && this.INTERSECTED.material.emissive ) {
-          this.INTERSECTED.material.emissive.setHex( this.INTERSECTED.currentHex );
+          // this.INTERSECTED.material.emissive.setHex( this.INTERSECTED.currentHex );
           this.INTERSECTED.material.needsUpdate = true;
         }
 
 
-        if ( this.INTERSECTED && this.INTERSECTED.name.includes( 'planet' ) && this.INTERSECTED.material && this.INTERSECTED.material.color ) {
+        if ( this.INTERSECTED && ( this.INTERSECTED.name.includes( 'interactive' ) || this.INTERSECTED.name.includes( 'planet' ) )&& this.INTERSECTED.material && this.INTERSECTED.material.color ) {
           this.INTERSECTED.material.color.setHex( 0xffffff );
           this.container.style.cursor = 'default';
+
+        }
+
+        if ( this.INTERSECTED && this.INTERSECTED.name.includes( 'Leg' ) ) {
+          
         }
 
         this.INTERSECTED = this.intersects[ 0 ].object;
         console.log( this.INTERSECTED.name );
 
         if ( this.INTERSECTED && this.INTERSECTED.material && this.INTERSECTED.material.emissive ) {
-          this.INTERSECTED.currentHex = this.INTERSECTED.material.emissive.getHex();
-          this.INTERSECTED.material.emissive.setHex( 0xcc11ff );
+          // this.INTERSECTED.currentHex = this.INTERSECTED.material.emissive.getHex();
+          // this.INTERSECTED.material.emissive.setHex( 0xcc11ff );
         }
 
-        if ( this.INTERSECTED && this.INTERSECTED.name.includes( 'planet' )  && this.INTERSECTED.material && this.INTERSECTED.material.color ) {
+        if ( this.INTERSECTED && ( this.INTERSECTED.name.includes( 'interactive' ) || this.INTERSECTED.name.includes( 'planet' ) ) && this.INTERSECTED.material && this.INTERSECTED.material.color ) {
           this.INTERSECTED.material.color.setHex( 0xaacc22 );
           this.container.style.cursor = 'pointer';
         }
@@ -753,8 +774,11 @@ export default class Sketch {
 
     } else { 
 
-      if ( this.INTERSECTED && this.INTERSECTED.material && this.INTERSECTED.material.emissive ) this.INTERSECTED.material.emissive.setHex( this.INTERSECTED.currentHex );
+      if ( this.INTERSECTED && this.INTERSECTED.material && this.INTERSECTED.material.emissive ) {
+        // this.INTERSECTED.material.emissive.setHex( this.INTERSECTED.currentHex );
+      }
       this.INTERSECTED = null;
+
 
     }
 

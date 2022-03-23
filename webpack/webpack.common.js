@@ -46,6 +46,10 @@ module.exports = {
         },
       },
       {
+        test: /\.(mp4)(\?.*)?$/,
+        type: 'asset/resource'
+      },
+      {
         test: /\.glsl$/,
         loader: 'webpack-glsl-loader'
       }
