@@ -26,7 +26,7 @@ import vid1ph from '../models/raumschiff_erde.jpeg';
 import theFont from '../static/metropolis.json';
 // import metropolisModel from '../models/untitled2.glb';
 // import metropolisModel from '../models/assembled17.glb';
-import metropolisModel from '../models/mitobjekten.glb';
+import metropolisModel from '../models/sm4.glb';
 import ant from '../models/lowpoly_ant/ant.glb';
 import krabbe from '../models/krabbe.glb';
 import '../../public/omegapunkt.mp4';
@@ -61,6 +61,9 @@ export default class Sketch {
     this.lMouseSpeed = new THREE.Vector2( 0.0, 0.0 );
     this.lMouse = new THREE.Vector2( 0.0, 0.0 );
 
+    this.yAxis = new THREE.Vector3(0, 1, 0);
+
+
     this.scene = new THREE.Scene();
     const color = 0xffffff;
     const near = 100;
@@ -72,6 +75,7 @@ export default class Sketch {
     this.camera = new THREE.PerspectiveCamera( 50, this.width / this.height, 0.1, 1000 );
     // this.camera.position.set( 20, 30, 50 );
     
+    this.cityGroup = new THREE.Group();
 
     this.appParams = {
       zoomedOut: false,
@@ -204,7 +208,7 @@ export default class Sketch {
       metalness: this.matMetalness,
       roughness: this.matRoughness,
       opacity: this.matOpacity,
-      side: THREE.DoubleSide,
+      // side: THREE.DoubleSide,
       transparent: true,
       // wireframe: true,
       // envMapIntensity: 5,
@@ -371,7 +375,7 @@ export default class Sketch {
 
     // this.scene.add( this.dirLight );
 
-    this.scene.add( new THREE.AmbientLight( 0xffffff, 1.0 ) );
+    // this.scene.add( new THREE.AmbientLight( 0xffffff, 1.0 ) );
 
     // const light = new THREE.PointLight( 0xff0000, 1, 100 );
     // light.position.set( 50, 50, 50 );
@@ -543,17 +547,18 @@ export default class Sketch {
       that.loader.setDRACOLoader( dracoLoader );
 
       that.loader.load( ant, ( gltf ) => {
-        const realAnt = gltf.scene.children[0];
-        realAnt.name = 'interactive-1';
-        realAnt.material.metalness = 0.7;
-        realAnt.material.roughness = .33;
-        realAnt.material.envMap = envMap;
-        realAnt.material.color.setHex( 0x00ffff );
-        realAnt.position.set( 30, 30, 30 );
-        that.scene.add( realAnt );
+        that.realAnt = gltf.scene.children[0];
+        that.realAnt.name = 'interactive-1';
+        that.realAnt.material.metalness = 0.7;
+        that.realAnt.material.roughness = .33;
+        that.realAnt.material.envMap = envMap;
+        that.realAnt.material.color.setHex( 0xffff );
+        that.realAnt.position.set( 33, 0, 32 );
+        that.realAnt.scale.set( 1.8, 1.8, 1.8 );
+        that.scene.add( that.realAnt );
       });
 
-      if ( false ) {
+      if ( true ) {
         that.loader.load( metropolisModel,
           function ( gltf ) {
             console.log( gltf );
@@ -564,7 +569,7 @@ export default class Sketch {
               console.log( 'is a mesh', child );
               
               // console.log( child.material );
-              child.material.metalness = 0.7;
+              child.material.metalness = 2.0;
               child.material.envMap = envMap;
               // child.material.opacity = 1.0;
               // child.material.reflectivity = 0.7;
@@ -716,11 +721,15 @@ export default class Sketch {
       this.dampenedMouseY += ( this.targetY - this.dampenedMouseY ) * DAMPENING_FACTOR;
     }
 
+    // select the Z world axis
+    // rotate the mesh 45 on this axis
+
     if ( this.city ) {
       this.city.rotation.y = -this.time / 70.0;
+      this.realAnt.rotation.y = -this.time / 70.0;
     }
 
-    this.videoObjects.rotation.y = - this.time / 60.0;
+    // this.videoObjects.rotation.y = - this.time / 60.0;
     
     // let camRot = this.cugetTangent(this.time / 10000);
     // this.mesh.position = camPos;
