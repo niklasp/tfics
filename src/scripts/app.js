@@ -25,8 +25,9 @@ import vid1ph from '../models/raumschiff_erde.jpeg';
 
 import theFont from '../static/metropolis.json';
 // import metropolisModel from '../models/untitled2.glb';
+import metropolisModel from '../models/pabloausstellung.glb';
 // import metropolisModel from '../models/assembled17.glb';
-import metropolisModel from '../models/sm4.glb';
+// import metropolisModel from '../models/sm4.glb';
 import ant from '../models/lowpoly_ant/ant.glb';
 import krabbe from '../models/krabbe.glb';
 import '../../public/omegapunkt.mp4';
