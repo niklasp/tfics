@@ -79,6 +79,10 @@ export default class Sketch {
 
     this.appParams = {
       zoomedOut: false,
+      ambLight: {
+        color: 0x281439,
+        intensity: 10.0,
+      }
     };
 
     const size = 100;
@@ -101,7 +105,7 @@ export default class Sketch {
 
     this.videoObjects = new THREE.Group();
 
-    this.matMetalness = 0.7;
+    this.matMetalness = 0.0;
     this.matColor = new THREE.Color( 0xa8ffbe );
     this.matOpacity = 1.0;
     this.matRoughness = 0.33;
@@ -368,7 +372,8 @@ export default class Sketch {
   addLights() {
     const color = new THREE.Color( 0x27094a );
     const intensity = 10.0;
-    this.light = new THREE.AmbientLight(color, intensity);
+    this.light = new THREE.AmbientLight( this.appParams.ambLight.color, this.appParams.ambLight.intensity );
+    
     this.scene.add(this.light);
     this.dirLight = new THREE.DirectionalLight(color, intensity );
     this.dirLight.position.set(0, 10, 0);
@@ -402,7 +407,13 @@ export default class Sketch {
   addGui() {
     const gui = new GUI();
     const that = this;
-    gui.add( document, 'controls' );
+    // gui.add( document, 'controls' );
+    gui.add(this.appParams.ambLight, 'intensity', 0, 5, 0.1 ).onChange( ( val ) => {
+      this.light.intensity = val;
+    });
+    gui.addColor(this.appParams.ambLight, 'color', 0, 5, 0.1 ).onChange( ( val ) => {
+      this.light.color.setHex( val );
+    });
     const objFolder = gui.addFolder( '3d object' );
     objFolder.add(this.mat, 'metalness', 0, 2, 0.01 ).onChange( ( val ) => {
       that.city.traverse( ( child ) => {
@@ -569,7 +580,7 @@ export default class Sketch {
               console.log( 'is a mesh', child );
               
               // console.log( child.material );
-              child.material.metalness = 2.0;
+              child.material.metalness = 0.0;
               child.material.envMap = envMap;
               // child.material.opacity = 1.0;
               // child.material.reflectivity = 0.7;
