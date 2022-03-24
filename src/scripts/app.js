@@ -29,7 +29,7 @@ import theFont from '../static/metropolis.json';
 import metropolisModel from '../models/mitobjekten.glb';
 import ant from '../models/lowpoly_ant/ant.glb';
 import krabbe from '../models/krabbe.glb';
-import '../models/omegapunkt.mp4';
+import '../../public/omegapunkt.mp4';
 
 //import shaders
 import vertexShader from '../shaders/vertex.glsl';
@@ -691,7 +691,7 @@ export default class Sketch {
 
     this.time+= 0.05;
     this.updateMouse();
-    this.camera.updateMatrixWorld();
+    // this.camera.updateMatrixWorld();
     this.controls.update( this.clock.getDelta() );
 
     // this.shaderPass.uniforms.u_mouse.value = this.mouse;
@@ -794,9 +794,9 @@ export default class Sketch {
     }
 
 
-    this.stats.begin();
+    // this.stats.begin();
     this.renderer.render( this.scene, this.camera );
-    this.stats.end();
+    // this.stats.end();
     
     window.requestAnimationFrame( this.render.bind( this ) );
 
