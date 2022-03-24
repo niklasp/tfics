@@ -242,7 +242,11 @@ export default class Sketch {
       playerVars: {
         controls: 0,
         fs: 0,
+        rel: 0,
+        playlist: '3FjTef9gn3Q',
         modestbranding: 1,
+        enablejsapi: 1,
+        origin: window.location.hostname,
         showinfo: 0,
       }
     });
@@ -545,6 +549,7 @@ export default class Sketch {
         realAnt.material.roughness = .33;
         realAnt.material.envMap = envMap;
         realAnt.material.color.setHex( 0x00ffff );
+        realAnt.position.set( 30, 30, 30 );
         that.scene.add( realAnt );
       });
 
