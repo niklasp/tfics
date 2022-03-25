@@ -883,7 +883,7 @@ export default class Sketch {
         const posIdx = index + 1;
         const element = this.planets[index];
         element.rotation.y = -this.time / 10.0;
-        element.rotation.x = -this.time / 27.0;
+        element.rotation.x = -this.time / 27.0 ;
         element.position.x = Math.sin( Math.PI/ 2 * index + this.time / 40 ) * radius;
         element.position.y = Math.cos( Math.PI/ 2 * index - this.time / 10 ) * radius / 4.;
         element.position.z = Math.cos( Math.PI/ 2 * index + this.time / 40 ) * radius;
