@@ -587,7 +587,7 @@ export default class Sketch {
         that.realAnt.material.envMap = envMap;
         that.realAnt.material.color.setHex( 0xffff );
         that.realAnt.position.set( 33, 0, 32 );
-        that.realAnt.scale.set( 1.8, 1.8, 1.8 );
+        that.realAnt.scale.set( 2, 2, 2 );
         that.scene.add( that.realAnt );
       });
 
@@ -883,10 +883,19 @@ export default class Sketch {
         const posIdx = index + 1;
         const element = this.planets[index];
         element.rotation.y = -this.time / 10.0;
+        element.rotation.x = -this.time / 27.0;
         element.position.x = Math.sin( Math.PI/ 2 * index + this.time / 40 ) * radius;
         element.position.y = Math.cos( Math.PI/ 2 * index - this.time / 10 ) * radius / 4.;
         element.position.z = Math.cos( Math.PI/ 2 * index + this.time / 40 ) * radius;
       }
+    }
+
+    if ( this.realAnt ) {
+      this.realAnt.rotation.y = -this.time / 12.0;
+      this.realAnt.rotation.x = -this.time / 10.0;
+      this.realAnt.position.x = Math.sin( Math.PI/ 2 + this.time / 40 ) * 80;
+      this.realAnt.position.y = Math.cos( Math.PI/ 2 - this.time / 10 ) * 80 / 4.;
+      this.realAnt.position.z = Math.cos( Math.PI/ 2 + this.time / 40 ) * 80;
     }
 
 
