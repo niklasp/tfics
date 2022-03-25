@@ -31,6 +31,9 @@ import metropolisModel from '../models/pabloausstellung.glb';
 import ant from '../models/lowpoly_ant/ant.glb';
 import krabbe from '../models/krabbe.glb';
 import '../../public/omegapunkt.mp4';
+import still1 from '../../public/still1.jpg';
+import still2 from '../../public/still2.jpg';
+import still4 from '../../public/still4.jpg';
 
 //import shaders
 import vertexShader from '../shaders/vertex.glsl';
@@ -112,9 +115,9 @@ export default class Sketch {
     this.matRoughness = 0.33;
     this.matReflectivity = 0.5;
 
-    this.stats = new Stats();
-    this.stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
-    document.body.appendChild( this.stats.dom );
+    // this.stats = new Stats();
+    // this.stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+    // document.body.appendChild( this.stats.dom );
 
     this.renderer = new THREE.WebGLRenderer( {
       antialias: true,
@@ -145,6 +148,8 @@ export default class Sketch {
       'beiQToIZFN8',
       'GqLWSsi_uhE',
     ];
+
+
     this.ytProgress = [
       0,
       0,
@@ -152,8 +157,18 @@ export default class Sketch {
       0,
       0,
     ];
+
+    this.ytTitles = [
+      'Spaceship Earth',
+      'Every Ant is a queen',
+      'united humanity',
+      'Time Stranger',
+      'Omega Point'
+    ];
     
     this.container.appendChild( this.renderer.domElement );
+    this.infoOverlay = document.querySelector('#info-overlay');
+    this.initialInfo = this.infoOverlay.innerHTML;
 
     this.composer = new EffectComposer( this.renderer );
     const renderPass = new RenderPass( this.scene, this.camera );
@@ -194,15 +209,15 @@ export default class Sketch {
     this.controls.autoRotateSpeed = 0.1;
     this.controls.rotateSpeed = 0.4;
     this.controls.minDistance = 10;
-    this.controls.maxDistance = 1500;
-    this.controls.zoomSpeed = 0.1;
-    this.controls.object.position.set(40,40,90);
+    this.controls.maxDistance = 500;
+    this.controls.zoomSpeed = 0.3;
+    this.controls.object.position.set(60,40,120);
 
     // this.controls = new PointerLockControls( this.camera, document.body );
 
     // this.controls = new FlyControls( this.camera, this.renderer.domElement );
 
-    // this.controls.movementSpeed = 1000;
+    this.controls.movementSpeed = 1000;
     // this.controls.domElement = this.renderer.domElement;
     // this.controls.rollSpeed = Math.PI / 24;
     // this.controls.autoForward = false;
@@ -242,7 +257,7 @@ export default class Sketch {
     this.addPlanets();
     this.addMovingText();
     this.addLights();
-    this.addGui();
+    // this.addGui();
     this.render();
   }
 
@@ -252,7 +267,7 @@ export default class Sketch {
         controls: 0,
         fs: 0,
         rel: 0,
-        playlist: '3FjTef9gn3Q',
+        playlist: 'PLKOpvjXJWuA6cn-Wel5TYt5ke5_5EAimV',
         modestbranding: 1,
         enablejsapi: 1,
         origin: window.location.hostname,
@@ -333,6 +348,9 @@ export default class Sketch {
     if ( ! this.appParams.zoomedOut ) {
       console.log( 'case not zoomed' );
       this.appParams.zoomedOut = true;
+      this.controls.maxDistance = 1500;
+      this.infoOverlay.innerHTML = 'click to go back';
+      this.infoOverlay.style.fontSize = '30px';
       this.playYt();
       const t = new TWEEN.Tween( this.controls.object.position )
       .to( {
@@ -346,12 +364,15 @@ export default class Sketch {
     } else {
       console.log( 'case zoomed' );
       this.appParams.zoomedOut = false;
+      this.controls.maxDistance = 500;
+      this.infoOverlay.innerHTML = this.initialInfo;
+      this.infoOverlay.style.fontSize = '100px';
       this.pauseYt();
       const t = new TWEEN.Tween( this.controls.object.position )
       .to( {
-        x: 40,
-        y: 20,
-        z: 50,
+        x: 60,
+        y: 40,
+        z: 120,
       }, 4000 )
       .easing(TWEEN.Easing.Quadratic.Out)
       .onUpdate( ( z ) => {
@@ -659,21 +680,63 @@ export default class Sketch {
 
   addPlanets() {
     this.planets = [];
-    const geom = new THREE.SphereGeometry( 50, 60, 40 );
-    const video = document.getElementById( 'vid1' );
-    video.play();
-    const texture = new THREE.VideoTexture( video );
-    const mat = new THREE.MeshBasicMaterial( {
+    const geom1 = new THREE.SphereGeometry( 50, 60, 40 );
+    const video1 = document.getElementById( 'vid1' );
+    video1.play();
+    const texture1 = new THREE.VideoTexture( video1 );
+    const mat1 = new THREE.MeshBasicMaterial( {
       color: 0xffffff,
-      map: texture,
+      map: texture1,
       side: THREE.DoubleSide,
     } );
-    const mesh = new THREE.Mesh(geom, mat);
-    mesh.position.set( 10, -50, 20 );
-    mesh.rotation.z = Math.PI / 6;
-    mesh.name = 'planet-4';
-    this.planets.push( mesh );
-    this.scene.add( mesh );
+    const mesh1 = new THREE.Mesh(geom1, mat1);
+    mesh1.position.set( 10, -50, 20 );
+    mesh1.rotation.z = Math.PI / 6;
+    mesh1.name = 'planet-4';
+    this.planets.push( mesh1 );
+    this.scene.add( mesh1 );
+
+    const geom2 = new THREE.SphereGeometry( 50, 60, 40 );
+    const texture2 = new THREE.TextureLoader().load( still1 );
+    const mat2 = new THREE.MeshBasicMaterial( {
+      color: 0xffffff,
+      map: texture2,
+      side: THREE.DoubleSide,
+    } );
+    const mesh2 = new THREE.Mesh(geom2, mat2);
+    mesh2.position.set( 60, -10, 20 );
+    mesh2.rotation.z = Math.PI / 6;
+    mesh2.name = 'planet-0';
+    this.planets.push( mesh2 );
+    this.scene.add( mesh2 );
+
+    const geom3 = new THREE.SphereGeometry( 50, 60, 40 );
+    const texture3 = new THREE.TextureLoader().load( still2 );
+    const mat3 = new THREE.MeshBasicMaterial( {
+      color: 0xffffff,
+      map: texture3,
+      side: THREE.DoubleSide,
+    } );
+    const mesh3 = new THREE.Mesh(geom3, mat3);
+    mesh3.position.set( 20, 50, -20 );
+    mesh3.rotation.z = Math.PI / 6;
+    mesh3.name = 'planet-2';
+    this.planets.push( mesh3 );
+    this.scene.add( mesh3 );
+
+    const geom4 = new THREE.SphereGeometry( 50, 60, 40 );
+    const texture4 = new THREE.TextureLoader().load( still4 );
+    const mat4 = new THREE.MeshBasicMaterial( {
+      color: 0xffffff,
+      map: texture4,
+      side: THREE.DoubleSide,
+    } );
+    const mesh4 = new THREE.Mesh(geom4, mat4);
+    mesh4.position.set( 20, 100, -20 );
+    mesh4.rotation.z = Math.PI / 6;
+    mesh4.name = 'planet-3';
+    this.planets.push( mesh4 );
+    this.scene.add( mesh4 );
   }
 
   addScreens( ) {
@@ -763,59 +826,66 @@ export default class Sketch {
     this.intersects = this.raycaster.intersectObjects( this.scene.children, false );
     // console.log( this )
 
-    if ( this.intersects.length > 0 ) {
+    if ( ! this.appParams.zoomedOut ) {
 
-      if ( this.INTERSECTED != this.intersects[ 0 ].object ) {
+      if ( this.intersects.length > 0 ) {
 
-        if ( this.INTERSECTED && this.INTERSECTED.material && this.INTERSECTED.material.emissive && this.INTERSECTED.material && this.INTERSECTED.material.emissive ) {
-          // this.INTERSECTED.material.emissive.setHex( this.INTERSECTED.currentHex );
-          this.INTERSECTED.material.needsUpdate = true;
+        if ( this.INTERSECTED != this.intersects[ 0 ].object ) {
+
+          if ( this.INTERSECTED && this.INTERSECTED.material && this.INTERSECTED.material.emissive && this.INTERSECTED.material && this.INTERSECTED.material.emissive ) {
+            // this.INTERSECTED.material.emissive.setHex( this.INTERSECTED.currentHex );
+            this.INTERSECTED.material.needsUpdate = true;
+          }
+
+
+          if ( this.INTERSECTED && ( this.INTERSECTED.name.includes( 'interactive' ) || this.INTERSECTED.name.includes( 'planet' ) )&& this.INTERSECTED.material && this.INTERSECTED.material.color ) {
+            this.INTERSECTED.material.color.setHex( 0xffffff );
+            this.container.style.cursor = 'default';
+            this.infoOverlay.innerHTML = this.initialInfo;
+          }
+
+          if ( this.INTERSECTED && this.INTERSECTED.name.includes( 'Leg' ) ) {
+            
+          }
+
+          this.INTERSECTED = this.intersects[ 0 ].object;
+          console.log( this.INTERSECTED.name );
+
+          if ( this.INTERSECTED && this.INTERSECTED.material && this.INTERSECTED.material.emissive ) {
+            // this.INTERSECTED.currentHex = this.INTERSECTED.material.emissive.getHex();
+            // this.INTERSECTED.material.emissive.setHex( 0xcc11ff );
+          }
+
+          if ( this.INTERSECTED && ( this.INTERSECTED.name.includes( 'interactive' ) || this.INTERSECTED.name.includes( 'planet' ) ) && this.INTERSECTED.material && this.INTERSECTED.material.color ) {
+            this.INTERSECTED.material.color.setHex( 0xaacc22 );
+            this.container.style.cursor = 'pointer';
+            const n = this.INTERSECTED.name;
+            const idx = n.split('-')[1];
+            this.infoOverlay.innerHTML = this.ytTitles[ idx ];
+          }
+
         }
 
-
-        if ( this.INTERSECTED && ( this.INTERSECTED.name.includes( 'interactive' ) || this.INTERSECTED.name.includes( 'planet' ) )&& this.INTERSECTED.material && this.INTERSECTED.material.color ) {
-          this.INTERSECTED.material.color.setHex( 0xffffff );
-          this.container.style.cursor = 'default';
-
-        }
-
-        if ( this.INTERSECTED && this.INTERSECTED.name.includes( 'Leg' ) ) {
-          
-        }
-
-        this.INTERSECTED = this.intersects[ 0 ].object;
-        console.log( this.INTERSECTED.name );
+      } else { 
 
         if ( this.INTERSECTED && this.INTERSECTED.material && this.INTERSECTED.material.emissive ) {
-          // this.INTERSECTED.currentHex = this.INTERSECTED.material.emissive.getHex();
-          // this.INTERSECTED.material.emissive.setHex( 0xcc11ff );
+          // this.INTERSECTED.material.emissive.setHex( this.INTERSECTED.currentHex );
         }
-
-        if ( this.INTERSECTED && ( this.INTERSECTED.name.includes( 'interactive' ) || this.INTERSECTED.name.includes( 'planet' ) ) && this.INTERSECTED.material && this.INTERSECTED.material.color ) {
-          this.INTERSECTED.material.color.setHex( 0xaacc22 );
-          this.container.style.cursor = 'pointer';
-        }
+        this.INTERSECTED = null;
+        this.infoOverlay.innerHTML = this.initialInfo;
 
       }
-
-    } else { 
-
-      if ( this.INTERSECTED && this.INTERSECTED.material && this.INTERSECTED.material.emissive ) {
-        // this.INTERSECTED.material.emissive.setHex( this.INTERSECTED.currentHex );
-      }
-      this.INTERSECTED = null;
-
-
     }
 
     if ( this.planets ) {
       const radius = 300;
       for (let index = 0; index < this.planets.length; index++) {
+        const posIdx = index + 1;
         const element = this.planets[index];
-        element.rotation.y = -this.time / 30.0;
-        element.position.x = Math.sin( this.time / 40 ) * radius;
-        element.position.y = Math.cos( this.time / 10 ) * radius / 4.;
-        element.position.z = Math.cos( this.time / 40 ) * radius;
+        element.rotation.y = -this.time / 10.0;
+        element.position.x = Math.sin( Math.PI/ 2 * index + this.time / 40 ) * radius;
+        element.position.y = Math.cos( Math.PI/ 2 * index - this.time / 10 ) * radius / 4.;
+        element.position.z = Math.cos( Math.PI/ 2 * index + this.time / 40 ) * radius;
       }
     }
 
